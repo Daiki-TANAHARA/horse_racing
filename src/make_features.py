@@ -6,11 +6,14 @@ import pandas as pd
 
 race_df = pd.read_csv("../data/19860105-20210731_race_result.csv", low_memory=False)
 
+df = race_df.copy()
+# 日付型へ変換
+df["レース日付"] = pd.to_datetime(df["レース日付"])
+
 # ======================
 # 2. 基本特徴量
 # ======================
 
-df = race_df.copy()
 
 # 芝=0 ダート=1
 df["芝・ダート区分"] = df["芝・ダート区分"].map({
@@ -25,11 +28,20 @@ df["性別"] = df["性別"].map({
     "セ": 2
 })
 
-#馬体重増減
+# 馬体重増減
 df["馬体重増減"] = df["場体重増減"].fillna(
     df["場体重増減"].median()
 )
 
+# 前走着順
+df = df.sort_values(["馬名", "レース日付"])
+df["前走着順"] = (
+    df.groupby("馬名")["着順"]
+      .shift(1)
+)
+
+# 保存前に日付順へ戻す
+df = df.sort_values("レース日付")
 
 
 # ======================
@@ -56,6 +68,7 @@ columns = [
     "性別",
     "単勝",
     "馬体重増減",
+    "前走着順",
 
     "複勝"
 ]
