@@ -14,6 +14,10 @@ from sklearn.metrics import (
     recall_score,
 )
 from xgboost import XGBClassifier
+import matplotlib.pyplot as plt
+plt.rcParams["font.family"] = "Hiragino Sans"
+from xgboost import plot_importance
+
 
 # ─────────────────────────────
 # 1. データ読込
@@ -111,3 +115,7 @@ importance = pd.Series(
 ).sort_values(ascending=False)
 print("\n=== 特徴量重要度 ===")
 print(importance.to_string())
+
+plot_importance(model, importance_type="gain")
+plt.tight_layout()
+plt.show()
