@@ -14,12 +14,18 @@ from sklearn.metrics import (
     recall_score,
 )
 from xgboost import XGBClassifier
+import matplotlib.pyplot as plt
+plt.rcParams["font.family"] = "Hiragino Sans"
+from xgboost import plot_importance
+
 
 # ─────────────────────────────
 # 1. データ読込
 # ─────────────────────────────
-df = pd.read_csv("preprocessed_race_result.csv", low_memory=False)
-df = df.sort_values("レースID")
+# df = pd.read_csv("preprocessed_race_result.csv", low_memory=False)
+df = pd.read_csv("../data/features.csv", low_memory=False)
+df["レース日付"] = pd.to_datetime(df["レース日付"])
+df = df.sort_values("レース日付")
 
 features = ["芝・ダート区分", "距離(m)", "馬齢", "馬体重"]
 target   = "複勝"
@@ -27,7 +33,12 @@ target   = "複勝"
 # ─────────────────────────────
 # 2. 時系列クロスバリデーション
 # ─────────────────────────────
-race_ids = np.array(sorted(df["レースID"].unique()))
+race_ids = (
+    df[["レースID", "レース日付"]]
+    .drop_duplicates()
+    .sort_values("レース日付")["レースID"]
+    .to_numpy()
+)
 tscv = TimeSeriesSplit(n_splits=5)
 
 results = []
@@ -36,6 +47,16 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     train_df = df[df["レースID"].isin(race_ids[train_idx])]
     test_df  = df[df["レースID"].isin(race_ids[test_idx])]
 
+    print(f"\n===== Fold {fold} =====")
+    print(
+        f"Train : {train_df['レース日付'].min().date()} ～ "
+        f"{train_df['レース日付'].max().date()}"
+    )
+    print(
+        f"Test  : {test_df['レース日付'].min().date()} ～ "
+        f"{test_df['レース日付'].max().date()}"
+    )
+    
     X_train, y_train = train_df[features], train_df[target]
     X_test,  y_test  = test_df[features],  test_df[target]
 
@@ -94,3 +115,7 @@ importance = pd.Series(
 ).sort_values(ascending=False)
 print("\n=== 特徴量重要度 ===")
 print(importance.to_string())
+
+plot_importance(model, importance_type="gain")
+plt.tight_layout()
+plt.show()
