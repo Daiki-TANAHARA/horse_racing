@@ -66,7 +66,7 @@ def handle_missing(df2: pd.DataFrame) -> pd.DataFrame:
 def encode_categorical(df2: pd.DataFrame) -> pd.DataFrame:
     """
     カテゴリデータを数値データに変換する関数です。
-    カテゴリ数が20種類以下ならOne-Hotエンコーディングを行い、それ以上ならLabelEncoderを行います。
+    カテゴリ数が20種類以下ならOne-Hotエンコーディングを行い、それ以上ならOridinalEncoderを行います。
 
     引数:
         データフレーム
@@ -97,7 +97,7 @@ def encode_categorical(df2: pd.DataFrame) -> pd.DataFrame:
         dtype = int
     )
 
-    #Label Encoding
+    #Oridinal Encoding
     for col in label_cols:
         le = OrdinalEncoder()
         df2[col] = le.fit_transform(df2[col].astype(str))
