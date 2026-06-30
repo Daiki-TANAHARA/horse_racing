@@ -82,6 +82,9 @@ def encode_categorical(df2: pd.DataFrame) -> pd.DataFrame:
 
         if not is_numeric_dtype(df2[col]): #df2[col]が数値型じゃない場合
             
+            if col in ["複勝", "レースID", "レース日付"]:
+                continue
+
             #カテゴリ数を数える
             n_unique = df2[col].nunique()
             

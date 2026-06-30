@@ -22,6 +22,7 @@ df = pd.read_csv(
     low_memory=False
 )
 
+print(df["レース日付"].head())
 # 前処理
 df = preprocess(df, features)
 
@@ -29,3 +30,5 @@ df = preprocess(df, features)
 df.to_csv("data/features.csv", index=False)
 
 print("features.csv を作成しました。")
+
+print(df["レース日付"].head())
