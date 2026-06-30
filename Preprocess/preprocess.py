@@ -100,7 +100,7 @@ def encode_categorical(df2: pd.DataFrame) -> pd.DataFrame:
     #Oridinal Encoding
     for col in label_cols:
         le = OrdinalEncoder()
-        df2[col] = le.fit_transform(df2[col].astype(str))
+        df2[col] = le.fit_transform(df2[[col]].astype(str))
 
     return df2
 
