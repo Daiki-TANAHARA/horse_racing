@@ -3,6 +3,30 @@ import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 from pandas.api.types import is_numeric_dtype
 
+def create_last5_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    過去5走の複勝率を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「過去5走複勝率」列を追加したデータフレーム
+    """
+
+    # 複勝フラグ作成（3着以内なら1、それ以外は0）
+    df["複勝フラグ"] = (df["着順"] <= 3).astype(int)
+
+    # 過去5走複勝率
+    df["過去5走複勝率"] = (
+        df.groupby("馬名")["複勝フラグ"]
+          .transform(lambda x: x.shift(1).rolling(5, min_periods=1).mean())
+    )
+
+    # 作業用列を削除
+    df = df.drop(columns=["複勝フラグ"])
+
+    return df
 
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
@@ -121,6 +145,11 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     戻り値:
         前処理後のデータフレーム
     """
+
+    df = df.sort_values(["馬名", "レース日付"])
+    df = create_last5_place_rate(df)
+    print(df.columns.tolist())
+    print(df[["馬名", "過去5走複勝率"]].head())
 
     df2 = select_features(df, features)
     df2 = create_target(df2)
