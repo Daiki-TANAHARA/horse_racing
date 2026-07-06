@@ -53,6 +53,24 @@ def create_last3_place_rate(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_previous_rank(df:pd.DataFrame) -> pd.DataFrame:
+    """
+    前走着順を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「前走着順」列を追加したデータフレーム
+    """
+
+    df["前走着順"] = (
+        df.groupby("馬名")["着順"]
+          .shift(1)
+    )
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -174,6 +192,7 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     df = df.sort_values(["馬名", "レース日付"])
     df = create_last5_place_rate(df)
     df = create_last3_place_rate(df)
+    df = create_previous_rank(df)
 
     df2 = select_features(df, features)
     df2 = create_target(df2)
