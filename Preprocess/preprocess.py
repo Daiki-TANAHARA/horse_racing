@@ -71,6 +71,24 @@ def create_previous_rank(df:pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_previous_last3f(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    前走上りを作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「前走上り」列を追加したデータフレーム
+    """
+
+    df["前走上り"] = (
+        df.groupby("馬名")["上り"]
+          .shift(1)
+    )
+
+    return df
+
 def create_last5_average_rank(df: pd.DataFrame) -> pd.DataFrame:
     """
     過去5走の平均着順を作成する関数です。
@@ -231,6 +249,7 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     df = create_previous_rank(df)
     df = create_last5_average_rank(df)
     df = create_last3_average_rank(df)
+    df = create_previous_last3f(df)
 
     df2 = select_features(df, features)
     df2 = create_target(df2)
