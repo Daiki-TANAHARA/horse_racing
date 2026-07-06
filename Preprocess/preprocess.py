@@ -28,6 +28,31 @@ def create_last5_place_rate(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_last3_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    過去3走の複勝率を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「過去3走複勝率」列を追加したデータフレーム
+    """
+
+    # 複勝フラグ作成（3着以内なら1、それ以外は0）
+    df["複勝フラグ"] = (df["着順"] <= 3).astype(int)
+
+    # 過去3走複勝率
+    df["過去3走複勝率"] = (
+        df.groupby("馬名")["複勝フラグ"]
+          .transform(lambda x: x.shift(1).rolling(3, min_periods=1).mean())
+    )
+
+    # 作業用列を削除
+    df = df.drop(columns=["複勝フラグ"])
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -148,8 +173,7 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
 
     df = df.sort_values(["馬名", "レース日付"])
     df = create_last5_place_rate(df)
-    print(df.columns.tolist())
-    print(df[["馬名", "過去5走複勝率"]].head())
+    df = create_last3_place_rate(df)
 
     df2 = select_features(df, features)
     df2 = create_target(df2)
