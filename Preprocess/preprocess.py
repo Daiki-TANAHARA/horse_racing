@@ -186,6 +186,31 @@ def create_jockey_place_rate(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_trainer_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    調教師の通算複勝率を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「調教師複勝率」列を追加したデータフレーム
+    """
+
+    # 複勝フラグ作成（3着以内なら1、それ以外は0）
+    df["複勝フラグ"] = (df["着順"] <= 3).astype(int)
+
+    # 調教師ごとの通算複勝率（現在のレースは含めない）
+    df["調教師複勝率"] = (
+        df.groupby("調教師")["複勝フラグ"]
+          .transform(lambda x: x.shift(1).expanding().mean())
+    )
+
+    # 作業用列を削除
+    df = df.drop(columns=["複勝フラグ"])
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -316,6 +341,9 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
 
     df = df.sort_values(["騎手", "レース日付", "発走時刻"])
     df = create_jockey_place_rate(df)
+
+    df = df.sort_values(["調教師", "レース日付", "発走時刻"])
+    df = create_trainer_place_rate(df)
 
     df2 = select_features(df, features)
     df2 = create_target(df2)
