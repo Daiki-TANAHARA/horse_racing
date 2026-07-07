@@ -143,6 +143,24 @@ def create_last3_average_last3f(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_last5_average_last3f(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    過去5走の平均上りを作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「過去5走平均上り」列を追加したデータフレーム
+    """
+
+    df["過去5走平均上り"] = (
+        df.groupby("馬名")["上り"]
+          .transform(lambda x: x.shift(1).rolling(5, min_periods=1).mean())
+    )
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -269,6 +287,7 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     df = create_last3_average_rank(df)
     df = create_previous_last3f(df)
     df = create_last3_average_last3f(df)
+    df = create_last5_average_last3f(df)
 
     df2 = select_features(df, features)
     df2 = create_target(df2)
