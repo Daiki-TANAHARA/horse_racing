@@ -161,6 +161,31 @@ def create_last5_average_last3f(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_jockey_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    騎手の通算複勝率を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「騎手複勝率」列を追加したデータフレーム
+    """
+
+    # 複勝フラグ作成（3着以内なら1、それ以外は0）
+    df["複勝フラグ"] = (df["着順"] <= 3).astype(int)
+
+    # 騎手ごとの通算複勝率（現在のレースは含めない）
+    df["騎手複勝率"] = (
+        df.groupby("騎手")["複勝フラグ"]
+          .transform(lambda x: x.shift(1).expanding().mean())
+    )
+
+    # 作業用列を削除
+    df = df.drop(columns=["複勝フラグ"])
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -279,7 +304,7 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
         前処理後のデータフレーム
     """
 
-    df = df.sort_values(["馬名", "レース日付"])
+    df = df.sort_values(["馬名", "レース日付", "発走時刻"])
     df = create_last5_place_rate(df)
     df = create_last3_place_rate(df)
     df = create_previous_rank(df)
@@ -288,6 +313,9 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     df = create_previous_last3f(df)
     df = create_last3_average_last3f(df)
     df = create_last5_average_last3f(df)
+
+    df = df.sort_values(["騎手", "レース日付", "発走時刻"])
+    df = create_jockey_place_rate(df)
 
     df2 = select_features(df, features)
     df2 = create_target(df2)
