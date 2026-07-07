@@ -26,6 +26,7 @@ features = [
     "過去5走平均上り",
     "騎手複勝率",
     "調教師複勝率",
+    "休養日数",
     "着順",  # preprocess()内で「複勝」を作るために必要
 ]
 
@@ -34,6 +35,8 @@ df = pd.read_csv(
     "../data/19860105-20210731_race_result.csv",
     low_memory=False
 )
+
+df["レース日付"] = pd.to_datetime(df["レース日付"])
 
 print(df["レース日付"].head())
 # 前処理

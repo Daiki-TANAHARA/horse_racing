@@ -211,6 +211,28 @@ def create_trainer_place_rate(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_rest_days(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    前走からの休養日数を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「休養日数」列を追加したデータフレーム
+    """
+
+    previous_date = (
+        df.groupby("馬名")["レース日付"]
+          .shift(1)
+    )
+
+    df["休養日数"] = (
+        df["レース日付"] - previous_date
+    ).dt.days
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -338,6 +360,7 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     df = create_previous_last3f(df)
     df = create_last3_average_last3f(df)
     df = create_last5_average_last3f(df)
+    df = create_rest_days(df)
 
     df = df.sort_values(["騎手", "レース日付", "発走時刻"])
     df = create_jockey_place_rate(df)
