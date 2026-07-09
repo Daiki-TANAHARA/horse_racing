@@ -3,6 +3,235 @@ import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 from pandas.api.types import is_numeric_dtype
 
+def create_last5_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    過去5走の複勝率を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「過去5走複勝率」列を追加したデータフレーム
+    """
+
+    # 複勝フラグ作成（3着以内なら1、それ以外は0）
+    df["複勝フラグ"] = (df["着順"] <= 3).astype(int)
+
+    # 過去5走複勝率
+    df["過去5走複勝率"] = (
+        df.groupby("馬名")["複勝フラグ"]
+          .transform(lambda x: x.shift(1).rolling(5, min_periods=1).mean())
+    )
+
+    # 作業用列を削除
+    df = df.drop(columns=["複勝フラグ"])
+
+    return df
+
+def create_last3_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    過去3走の複勝率を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「過去3走複勝率」列を追加したデータフレーム
+    """
+
+    # 複勝フラグ作成（3着以内なら1、それ以外は0）
+    df["複勝フラグ"] = (df["着順"] <= 3).astype(int)
+
+    # 過去3走複勝率
+    df["過去3走複勝率"] = (
+        df.groupby("馬名")["複勝フラグ"]
+          .transform(lambda x: x.shift(1).rolling(3, min_periods=1).mean())
+    )
+
+    # 作業用列を削除
+    df = df.drop(columns=["複勝フラグ"])
+
+    return df
+
+def create_previous_rank(df:pd.DataFrame) -> pd.DataFrame:
+    """
+    前走着順を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「前走着順」列を追加したデータフレーム
+    """
+
+    df["前走着順"] = (
+        df.groupby("馬名")["着順"]
+          .shift(1)
+    )
+
+    return df
+
+def create_last5_average_rank(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    過去5走の平均着順を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「過去5走平均着順」列を追加したデータフレーム
+    """
+
+    df["過去5走平均着順"] = (
+        df.groupby("馬名")["着順"]
+          .transform(lambda x: x.shift(1).rolling(5, min_periods=1).mean())
+    )
+
+    return df
+
+def create_last3_average_rank(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    過去3走の平均着順を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「過去3走平均着順」列を追加したデータフレーム
+    """
+
+    df["過去3走平均着順"] = (
+        df.groupby("馬名")["着順"]
+          .transform(lambda x: x.shift(1).rolling(3, min_periods=1).mean())
+    )
+
+    return df
+
+def create_previous_last3f(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    前走上りを作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「前走上り」列を追加したデータフレーム
+    """
+
+    df["前走上り"] = (
+        df.groupby("馬名")["上り"]
+          .shift(1)
+    )
+
+    return df
+
+def create_last3_average_last3f(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    過去3走の平均上りを作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「過去3走平均上り」列を追加したデータフレーム
+    """
+
+    df["過去3走平均上り"] = (
+        df.groupby("馬名")["上り"]
+          .transform(lambda x: x.shift(1).rolling(3, min_periods=1).mean())
+    )
+
+    return df
+
+def create_last5_average_last3f(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    過去5走の平均上りを作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「過去5走平均上り」列を追加したデータフレーム
+    """
+
+    df["過去5走平均上り"] = (
+        df.groupby("馬名")["上り"]
+          .transform(lambda x: x.shift(1).rolling(5, min_periods=1).mean())
+    )
+
+    return df
+
+def create_jockey_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    騎手の通算複勝率を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「騎手複勝率」列を追加したデータフレーム
+    """
+
+    # 複勝フラグ作成（3着以内なら1、それ以外は0）
+    df["複勝フラグ"] = (df["着順"] <= 3).astype(int)
+
+    # 騎手ごとの通算複勝率（現在のレースは含めない）
+    df["騎手複勝率"] = (
+        df.groupby("騎手")["複勝フラグ"]
+          .transform(lambda x: x.shift(1).expanding().mean())
+    )
+
+    # 作業用列を削除
+    df = df.drop(columns=["複勝フラグ"])
+
+    return df
+
+def create_trainer_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    調教師の通算複勝率を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「調教師複勝率」列を追加したデータフレーム
+    """
+
+    # 複勝フラグ作成（3着以内なら1、それ以外は0）
+    df["複勝フラグ"] = (df["着順"] <= 3).astype(int)
+
+    # 調教師ごとの通算複勝率（現在のレースは含めない）
+    df["調教師複勝率"] = (
+        df.groupby("調教師")["複勝フラグ"]
+          .transform(lambda x: x.shift(1).expanding().mean())
+    )
+
+    # 作業用列を削除
+    df = df.drop(columns=["複勝フラグ"])
+
+    return df
+
+def create_rest_days(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    前走からの休養日数を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「休養日数」列を追加したデータフレーム
+    """
+
+    previous_date = (
+        df.groupby("馬名")["レース日付"]
+          .shift(1)
+    )
+
+    df["休養日数"] = (
+        df["レース日付"] - previous_date
+    ).dt.days
+
+    return df
 
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
@@ -121,6 +350,23 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     戻り値:
         前処理後のデータフレーム
     """
+
+    df = df.sort_values(["馬名", "レース日付", "発走時刻"])
+    df = create_last5_place_rate(df)
+    df = create_last3_place_rate(df)
+    df = create_previous_rank(df)
+    df = create_last5_average_rank(df)
+    df = create_last3_average_rank(df)
+    df = create_previous_last3f(df)
+    df = create_last3_average_last3f(df)
+    df = create_last5_average_last3f(df)
+    df = create_rest_days(df)
+
+    df = df.sort_values(["騎手", "レース日付", "発走時刻"])
+    df = create_jockey_place_rate(df)
+
+    df = df.sort_values(["調教師", "レース日付", "発走時刻"])
+    df = create_trainer_place_rate(df)
 
     df2 = select_features(df, features)
     df2 = create_target(df2)
