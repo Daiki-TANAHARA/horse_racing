@@ -351,6 +351,11 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
         前処理後のデータフレーム
     """
 
+    # 列名を分かりやすく変更
+    df = df.rename(columns={
+        "場体重増減": "馬体重増減"
+    })
+
     df = df.sort_values(["馬名", "レース日付", "発走時刻"])
     df = create_last5_place_rate(df)
     df = create_last3_place_rate(df)
