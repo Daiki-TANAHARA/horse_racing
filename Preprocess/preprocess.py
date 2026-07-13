@@ -233,6 +233,26 @@ def create_rest_days(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_surface_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    芝・ダート別通算複勝率を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「芝・ダート別複勝率」列を追加したデータフレーム
+    """
+
+    place = (df["着順"] <= 3).astype(int)
+
+    df["芝・ダート別複勝率"] = (
+        place.groupby([df["馬名"], df["芝・ダート区分"]])
+        .transform(lambda x: x.shift(1).expanding().mean())
+    )
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -368,6 +388,7 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     df = create_last3_average_last3f(df)
     df = create_last5_average_last3f(df)
     df = create_rest_days(df)
+    df = create_surface_place_rate(df)
 
     df = df.sort_values(["騎手", "レース日付", "発走時刻"])
     df = create_jockey_place_rate(df)
