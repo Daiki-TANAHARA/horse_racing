@@ -402,6 +402,33 @@ def create_race_grade(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_rank_features(
+    df: pd.DataFrame,
+    rank_features: dict[str, bool]
+) -> pd.DataFrame:
+    """
+    同一レース内でパーセンタイル順位を作成する関数です。
+
+    引数:
+        df : データフレーム
+        rank_features :
+            {"特徴量名": ascending} の辞書
+            True  -> 小さいほど良い
+            False -> 大きいほど良い
+    """
+
+    for feature, ascending in rank_features.items():
+        df[f"{feature}順位率"] = (
+            df.groupby("レースID")[feature]
+              .rank(
+                  method="min",
+                  ascending=ascending,
+                  pct=True
+              )
+        )
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -554,6 +581,22 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
 
     df = df.sort_values(["調教師", "レース日付", "発走時刻"])
     df = create_trainer_place_rate(df)
+
+    rank_features = {
+        "過去3走平均着順": True,      # 小さいほど良い(着順なので)
+        "過去5走平均着順": True,
+        "過去3走平均上り": True,      # 上りタイムも小さいほど良い
+        "過去5走平均上り": True,
+        "過去3走複勝率": False,       # 大きいほど良い
+        "過去5走複勝率": False,
+        "騎手複勝率": False,
+        "調教師複勝率": False,
+        "芝・ダート別複勝率": False,
+        "距離帯別複勝率": False,
+        "競馬場別複勝率": False,
+    }
+
+    df = create_rank_features(df, rank_features)
 
     df2 = select_features(df, features)
     df2 = create_target(df2)
