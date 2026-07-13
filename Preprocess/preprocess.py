@@ -429,6 +429,32 @@ def create_rank_features(
 
     return df
 
+def zscore(x):
+    std = x.std()
+
+    if std == 0:
+        return pd.Series(0, index=x.index)
+
+    return (x - x.mean()) / std
+
+
+def create_standardize_features(
+    df: pd.DataFrame,
+    standardize_features: list[str]
+) -> pd.DataFrame:
+    """
+    同一レース内で標準化した特徴量を作成する関数です。
+    標準偏差が0の場合は0を設定します。
+    """
+
+    for feature in standardize_features:
+        df[f"{feature}標準化"] = (
+            df.groupby("レースID")[feature]
+              .transform(zscore)
+        )
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -597,6 +623,22 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     }
 
     df = create_rank_features(df, rank_features)
+
+    zscore_features = [
+        "過去3走平均着順",
+        "過去5走平均着順",
+        "過去3走平均上り",
+        "過去5走平均上り",
+        "過去3走複勝率",
+        "過去5走複勝率",
+        "騎手複勝率",
+        "調教師複勝率",
+        "芝・ダート別複勝率",
+        "距離帯別複勝率",
+        "競馬場別複勝率",
+    ]
+
+    df = create_standardize_features(df, zscore_features)
 
     df2 = select_features(df, features)
     df2 = create_target(df2)
