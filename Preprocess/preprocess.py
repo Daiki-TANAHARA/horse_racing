@@ -2,6 +2,7 @@
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 from pandas.api.types import is_numeric_dtype
+import numpy as np
 
 def create_last5_place_rate(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -273,6 +274,60 @@ def create_course_place_rate(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_distance_category(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    レース距離から距離帯を作成する関数です。
+
+    距離帯の区分
+        短距離   : 1400m以下
+        マイル   : 1401～1800m
+        中距離   : 1801～2200m
+        中長距離 : 2201～2800m
+        長距離   : 2801m～
+    """
+
+    distance_conditions = [
+        df["距離(m)"] <= 1400,
+        df["距離(m)"] <= 1800,
+        df["距離(m)"] <= 2200,
+        df["距離(m)"] <= 2800,
+    ]
+
+    distance_choices = [
+        "短距離",
+        "マイル",
+        "中距離",
+        "中長距離",
+    ]
+
+    df["距離帯"] = np.select(
+        distance_conditions,
+        distance_choices,
+        default="長距離"
+    )
+
+    return df
+
+def create_distance_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    馬ごとの距離帯別通算複勝率を作成する関数です。
+
+    例:
+        短距離のレースでは短距離での過去複勝率
+        マイルのレースではマイルでの過去複勝率
+        を特徴量として使用します。
+    """
+
+    place = (df["着順"] <= 3).astype(int)
+
+    df["距離帯別複勝率"] = (
+        place
+        .groupby([df["馬名"], df["距離帯"]])
+        .transform(lambda x: x.shift(1).expanding().mean())
+    )
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -391,12 +446,17 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
         前処理後のデータフレーム
     """
 
+    # 障害レースを除外
+    df = df[df["障害区分"].isna()].copy()
+    
     # 列名を分かりやすく変更
     df = df.rename(columns={
         "場体重増減": "馬体重増減"
     })
 
     df["天候"] = df["天候"].str.strip()
+
+    df = create_distance_category(df)
 
     df = df.sort_values(["馬名", "レース日付", "発走時刻"])
     df = create_last5_place_rate(df)
@@ -410,6 +470,7 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     df = create_rest_days(df)
     df = create_surface_place_rate(df)
     df = create_course_place_rate(df)
+    df = create_distance_place_rate(df)
 
     df = df.sort_values(["騎手", "レース日付", "発走時刻"])
     df = create_jockey_place_rate(df)
