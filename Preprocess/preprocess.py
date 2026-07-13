@@ -328,6 +328,80 @@ def create_distance_place_rate(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_race_class(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    競争条件からレースクラスを作成する関数です。
+
+    区分:
+        新馬
+        未勝利
+        1勝クラス
+        2勝クラス
+        3勝クラス
+        オープン
+    """
+
+    def convert_class(x):
+
+        if "新馬" in x or "未出走" in x:
+            return "新馬"
+
+        elif "未勝利" in x:
+            return "未勝利"
+
+        elif any(word in x for word in [
+            "1400万下",
+            "1500万下",
+            "1600万下",
+            "3勝クラス"
+        ]):
+            return "3勝クラス"
+
+        elif any(word in x for word in [
+            "600万下",
+            "700万下",
+            "800万下",
+            "900万下",
+            "1000万下",
+            "2勝クラス"
+        ]):
+            return "2勝クラス"
+
+        elif any(word in x for word in [
+            "300万下",
+            "400万下",
+            "500万下",
+            "1勝クラス"
+        ]):
+            return "1勝クラス"
+
+        elif "オープン" in x:
+            return "オープン"
+
+        else:
+            return "その他"
+
+    df["レースクラス"] = df["競争条件"].apply(convert_class)
+
+    return df
+
+def create_race_grade(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    リステッド・重賞競走からレースグレードを作成する関数です。
+
+    区分:
+        G1
+        G2
+        G3
+        L
+        G
+        なし
+    """
+
+    df["レースグレード"] = df["リステッド・重賞競走"].fillna("なし")
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -471,6 +545,9 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     df = create_surface_place_rate(df)
     df = create_course_place_rate(df)
     df = create_distance_place_rate(df)
+
+    df = create_race_class(df)
+    df = create_race_grade(df)
 
     df = df.sort_values(["騎手", "レース日付", "発走時刻"])
     df = create_jockey_place_rate(df)
