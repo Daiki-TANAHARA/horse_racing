@@ -2,6 +2,7 @@
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 from pandas.api.types import is_numeric_dtype
+import numpy as np
 
 def create_last5_place_rate(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -233,6 +234,227 @@ def create_rest_days(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def create_surface_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    芝・ダート別通算複勝率を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「芝・ダート別複勝率」列を追加したデータフレーム
+    """
+
+    place = (df["着順"] <= 3).astype(int)
+
+    df["芝・ダート別複勝率"] = (
+        place.groupby([df["馬名"], df["芝・ダート区分"]])
+        .transform(lambda x: x.shift(1).expanding().mean())
+    )
+
+    return df
+
+def create_course_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    競馬場別通算複勝率を作成する関数です。
+
+    引数:
+        データフレーム
+
+    戻り値:
+        「競馬場別複勝率」列を追加したデータフレーム
+    """
+
+    place = (df["着順"] <= 3).astype(int)
+
+    df["競馬場別複勝率"] = (
+        place.groupby([df["馬名"], df["競馬場名"]])
+        .transform(lambda x: x.shift(1).expanding().mean())
+    )
+
+    return df
+
+def create_distance_category(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    レース距離から距離帯を作成する関数です。
+
+    距離帯の区分
+        短距離   : 1400m以下
+        マイル   : 1401～1800m
+        中距離   : 1801～2200m
+        中長距離 : 2201～2800m
+        長距離   : 2801m～
+    """
+
+    distance_conditions = [
+        df["距離(m)"] <= 1400,
+        df["距離(m)"] <= 1800,
+        df["距離(m)"] <= 2200,
+        df["距離(m)"] <= 2800,
+    ]
+
+    distance_choices = [
+        "短距離",
+        "マイル",
+        "中距離",
+        "中長距離",
+    ]
+
+    df["距離帯"] = np.select(
+        distance_conditions,
+        distance_choices,
+        default="長距離"
+    )
+
+    return df
+
+def create_distance_place_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    馬ごとの距離帯別通算複勝率を作成する関数です。
+
+    例:
+        短距離のレースでは短距離での過去複勝率
+        マイルのレースではマイルでの過去複勝率
+        を特徴量として使用します。
+    """
+
+    place = (df["着順"] <= 3).astype(int)
+
+    df["距離帯別複勝率"] = (
+        place
+        .groupby([df["馬名"], df["距離帯"]])
+        .transform(lambda x: x.shift(1).expanding().mean())
+    )
+
+    return df
+
+def create_race_class(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    競争条件からレースクラスを作成する関数です。
+
+    区分:
+        新馬
+        未勝利
+        1勝クラス
+        2勝クラス
+        3勝クラス
+        オープン
+    """
+
+    def convert_class(x):
+
+        if "新馬" in x or "未出走" in x:
+            return "新馬"
+
+        elif "未勝利" in x:
+            return "未勝利"
+
+        elif any(word in x for word in [
+            "1400万下",
+            "1500万下",
+            "1600万下",
+            "3勝クラス"
+        ]):
+            return "3勝クラス"
+
+        elif any(word in x for word in [
+            "600万下",
+            "700万下",
+            "800万下",
+            "900万下",
+            "1000万下",
+            "2勝クラス"
+        ]):
+            return "2勝クラス"
+
+        elif any(word in x for word in [
+            "300万下",
+            "400万下",
+            "500万下",
+            "1勝クラス"
+        ]):
+            return "1勝クラス"
+
+        elif "オープン" in x:
+            return "オープン"
+
+        else:
+            return "その他"
+
+    df["レースクラス"] = df["競争条件"].apply(convert_class)
+
+    return df
+
+def create_race_grade(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    リステッド・重賞競走からレースグレードを作成する関数です。
+
+    区分:
+        G1
+        G2
+        G3
+        L
+        G
+        なし
+    """
+
+    df["レースグレード"] = df["リステッド・重賞競走"].fillna("なし")
+
+    return df
+
+def create_rank_features(
+    df: pd.DataFrame,
+    rank_features: dict[str, bool]
+) -> pd.DataFrame:
+    """
+    同一レース内でパーセンタイル順位を作成する関数です。
+
+    引数:
+        df : データフレーム
+        rank_features :
+            {"特徴量名": ascending} の辞書
+            True  -> 小さいほど良い
+            False -> 大きいほど良い
+    """
+
+    for feature, ascending in rank_features.items():
+        df[f"{feature}順位率"] = (
+            df.groupby("レースID")[feature]
+              .rank(
+                  method="min",
+                  ascending=ascending,
+                  pct=True
+              )
+        )
+
+    return df
+
+def zscore(x):
+    std = x.std()
+
+    if std == 0:
+        return pd.Series(0, index=x.index)
+
+    return (x - x.mean()) / std
+
+
+def create_standardize_features(
+    df: pd.DataFrame,
+    standardize_features: list[str]
+) -> pd.DataFrame:
+    """
+    同一レース内で標準化した特徴量を作成する関数です。
+    標準偏差が0の場合は0を設定します。
+    """
+
+    for feature in standardize_features:
+        df[f"{feature}標準化"] = (
+            df.groupby("レースID")[feature]
+              .transform(zscore)
+        )
+
+    return df
+
 def select_features(df:pd.DataFrame ,features:list[str])-> pd.DataFrame:
     """
     使用する特徴量だけを抽出する関数です。
@@ -351,6 +573,18 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
         前処理後のデータフレーム
     """
 
+    # 障害レースを除外
+    df = df[df["障害区分"].isna()].copy()
+    
+    # 列名を分かりやすく変更
+    df = df.rename(columns={
+        "場体重増減": "馬体重増減"
+    })
+
+    df["天候"] = df["天候"].str.strip()
+
+    df = create_distance_category(df)
+
     df = df.sort_values(["馬名", "レース日付", "発走時刻"])
     df = create_last5_place_rate(df)
     df = create_last3_place_rate(df)
@@ -361,12 +595,50 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     df = create_last3_average_last3f(df)
     df = create_last5_average_last3f(df)
     df = create_rest_days(df)
+    df = create_surface_place_rate(df)
+    df = create_course_place_rate(df)
+    df = create_distance_place_rate(df)
+
+    df = create_race_class(df)
+    df = create_race_grade(df)
 
     df = df.sort_values(["騎手", "レース日付", "発走時刻"])
     df = create_jockey_place_rate(df)
 
     df = df.sort_values(["調教師", "レース日付", "発走時刻"])
     df = create_trainer_place_rate(df)
+
+    rank_features = {
+        "過去3走平均着順": True,      # 小さいほど良い(着順なので)
+        "過去5走平均着順": True,
+        "過去3走平均上り": True,      # 上りタイムも小さいほど良い
+        "過去5走平均上り": True,
+        "過去3走複勝率": False,       # 大きいほど良い
+        "過去5走複勝率": False,
+        "騎手複勝率": False,
+        "調教師複勝率": False,
+        "芝・ダート別複勝率": False,
+        "距離帯別複勝率": False,
+        "競馬場別複勝率": False,
+    }
+
+    df = create_rank_features(df, rank_features)
+
+    zscore_features = [
+        "過去3走平均着順",
+        "過去5走平均着順",
+        "過去3走平均上り",
+        "過去5走平均上り",
+        "過去3走複勝率",
+        "過去5走複勝率",
+        "騎手複勝率",
+        "調教師複勝率",
+        "芝・ダート別複勝率",
+        "距離帯別複勝率",
+        "競馬場別複勝率",
+    ]
+
+    df = create_standardize_features(df, zscore_features)
 
     df2 = select_features(df, features)
     df2 = create_target(df2)
