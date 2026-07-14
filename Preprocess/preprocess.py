@@ -620,6 +620,13 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
         "芝・ダート別複勝率": False,
         "距離帯別複勝率": False,
         "競馬場別複勝率": False,
+
+        # 追加
+        "斤量": True,          # 軽いほど有利
+        "馬齢": True,          # 若い方が有利と仮定
+        "馬体重": False,       # 大きい方が有利と仮定
+        "馬体重増減": True,    # 変化量が小さい方が安定
+        "休養日数": True,      # 少ない方を上位とする
     }
 
     df = create_rank_features(df, rank_features)
@@ -636,6 +643,13 @@ def preprocess(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
         "芝・ダート別複勝率",
         "距離帯別複勝率",
         "競馬場別複勝率",
+
+        #追加
+        "斤量",
+        "馬齢",
+        "馬体重",
+        "馬体重増減",
+        "休養日数",
     ]
 
     df = create_standardize_features(df, zscore_features)
