@@ -142,6 +142,7 @@ race_ids = (
 tscv = TimeSeriesSplit(n_splits=5)
 
 results = []
+all_test_results = []
 
 for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     train_df = df[df["レースID"].isin(race_ids[train_idx])]
@@ -184,6 +185,11 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     pred_proba = model.predict_proba(X_test)[:, 1]
     pred_label = model.predict(X_test)
 
+    test_result = test_df[["レースID", "レース日付", "馬番", "人気", "複勝"]].copy()
+    test_result["予測確率"] = pred_proba
+    test_result["Fold"] = fold
+    all_test_results.append(test_result)
+
     results.append({
         "Fold":      fold,
         "Accuracy":  accuracy_score(y_test, pred_label),
@@ -201,14 +207,21 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
           f"Rec={results[-1]['Recall']:.4f}")
 
 # ─────────────────────────────
-# 5. 集計
+# 5. 予測結果の保存 ← 追加
+# ─────────────────────────────
+all_test_results = pd.concat(all_test_results, ignore_index=True)
+all_test_results.to_csv("../results/xgboost_test_results.csv", index=False)
+print("results/xgboost_test_results.csv を保存しました。")
+
+# ─────────────────────────────
+# 6. 集計
 # ─────────────────────────────
 results_df = pd.DataFrame(results).set_index("Fold")
 print("\n=== XGBoost 平均スコア ===")
 print(results_df.mean().to_string())
 
 # ─────────────────────────────
-# 6. 特徴量重要度
+# 7. 特徴量重要度
 # ─────────────────────────────
 importance = pd.Series(
     model.feature_importances_, index=features
