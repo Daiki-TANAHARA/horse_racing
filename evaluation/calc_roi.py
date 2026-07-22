@@ -136,3 +136,73 @@ def evaluate_roi(
         "モデル上位3頭回収率": calc_return_rate(model_top3),
         "人気上位3頭回収率":   calc_return_rate(popular_top3),
     }
+
+def select_by_threshold(
+    test_result: pd.DataFrame,
+    score_col: str,
+    threshold: float
+) -> pd.DataFrame:
+    """
+    予測スコアが閾値以上の馬だけを選ぶ関数です。
+    (レースごとに複数該当する場合もあれば、1頭も該当しないレースもありえます)
+
+    引数:
+        test_result: 予測結果データ
+        score_col: 判定に使うスコア列名(例:「予測確率」)
+        threshold: この値以上のスコアを持つ馬だけを選ぶ
+
+    戻り値:
+        条件を満たす馬だけのデータフレーム
+    """
+    return test_result[test_result[score_col] >= threshold]
+
+
+def evaluate_roi_by_threshold(
+    test_result: pd.DataFrame,
+    odds_df: pd.DataFrame,
+    model_score_col: str,
+    thresholds: list[float]
+) -> pd.DataFrame:
+    """
+    複数の閾値について、回収率とカバー率をまとめて計算する関数です。
+
+    引数:
+        test_result: 全Fold分の予測結果を concat した全期間データ
+        odds_df: odds.csvを読み込んだデータフレーム
+        model_score_col: モデルの予測スコア列名(例:「予測確率」)
+        thresholds: 試したい閾値のリスト(例:[0.5, 0.6, 0.7, 0.8])
+
+    戻り値:
+        閾値ごとの回収率・賭けた頭数・カバーレース数をまとめたデータフレーム
+    """
+    place_payout = build_place_payout_lookup(odds_df)
+    test_result = attach_payout(test_result, place_payout)
+
+    total_races = test_result["レースID"].nunique()
+    records = []
+
+    for threshold in thresholds:
+        bets = select_by_threshold(test_result, model_score_col, threshold)
+
+        if len(bets) == 0:
+            records.append({
+                "閾値": threshold,
+                "回収率": None,
+                "賭けた頭数": 0,
+                "カバーレース数": 0,
+                "カバー率": 0.0,
+            })
+            continue
+
+        roi = calc_return_rate(bets)
+        n_races_covered = bets["レースID"].nunique()
+
+        records.append({
+            "閾値": threshold,
+            "回収率": roi,
+            "賭けた頭数": len(bets),
+            "カバーレース数": n_races_covered,
+            "カバー率": n_races_covered / total_races * 100,
+        })
+
+    return pd.DataFrame(records)
