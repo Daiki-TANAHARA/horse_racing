@@ -179,6 +179,8 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     )
     model.fit(X_train, y_train)
 
+    model.save_model(f"../models/xgboost_fold{fold}.json")
+
     # ─────────────────────────────
     # 4. 評価
     # ─────────────────────────────

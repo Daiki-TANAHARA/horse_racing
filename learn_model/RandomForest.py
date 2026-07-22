@@ -14,6 +14,7 @@ from sklearn.metrics import (
     recall_score,
 )
 from sklearn.ensemble import RandomForestClassifier
+import joblib
 
 # ─────────────────────────────
 # 1. データ読込
@@ -170,6 +171,8 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
         n_jobs=-1,
     )
     model.fit(X_train, y_train)
+
+    joblib.dump(model, f"../models/randomforest_fold{fold}.joblib")
 
     # ─────────────────────────────
     # 4. 評価
