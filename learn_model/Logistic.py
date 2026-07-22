@@ -16,6 +16,7 @@ from sklearn.metrics import (
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
+import joblib
 
 # ─────────────────────────────
 # 1. データ読込
@@ -173,6 +174,8 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
         )),
     ])
     model.fit(X_train, y_train)
+
+    joblib.dump(model, f"../models/logistic_fold{fold}.joblib")
 
     # ─────────────────────────────
     # 4. 評価

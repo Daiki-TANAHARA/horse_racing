@@ -11,3 +11,7 @@ data/*.csv
 
 # Results
 results/*.csv
+
+# Models
+models/*
+!models/.gitkeep
