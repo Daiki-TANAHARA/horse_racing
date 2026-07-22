@@ -206,3 +206,63 @@ def evaluate_roi_by_threshold(
         })
 
     return pd.DataFrame(records)
+
+def select_top1_with_threshold(
+    test_result: pd.DataFrame,
+    score_col: str,
+    threshold: float
+) -> pd.DataFrame:
+    """
+    各レースで予測スコアが最も高い馬(1位)を選び、
+    その馬のスコアが閾値以上の場合のみ残す関数です。
+    (1レースにつき購入は0頭か1頭のみ)
+
+    引数:
+        test_result: 予測結果データ
+        score_col: 順位付け・判定に使うスコア列名(例:「予測確率」)
+        threshold: この値以上の場合のみ購入対象とする
+
+    戻り値:
+        条件を満たすレースの1位馬のみのデータフレーム
+    """
+    top1 = select_top_n(test_result, score_col, n=1, ascending=False)
+    return top1[top1[score_col] >= threshold]
+
+def evaluate_roi_top1_by_threshold(
+    test_result: pd.DataFrame,
+    odds_df: pd.DataFrame,
+    model_score_col: str,
+    thresholds: list[float]
+) -> pd.DataFrame:
+    """
+    各レースの1位馬について、複数の閾値でフィルタした場合の
+    回収率とカバー率をまとめて計算する関数です。
+    """
+    place_payout = build_place_payout_lookup(odds_df)
+    test_result = attach_payout(test_result, place_payout)
+
+    total_races = test_result["レースID"].nunique()
+    records = []
+
+    for threshold in thresholds:
+        bets = select_top1_with_threshold(test_result, model_score_col, threshold)
+
+        if len(bets) == 0:
+            records.append({
+                "閾値": threshold,
+                "回収率": None,
+                "購入レース数": 0,
+                "カバー率": 0.0,
+            })
+            continue
+
+        roi = calc_return_rate(bets)
+
+        records.append({
+            "閾値": threshold,
+            "回収率": roi,
+            "購入レース数": len(bets),  # 1位のみなので、頭数=レース数
+            "カバー率": len(bets) / total_races * 100,
+        })
+
+    return pd.DataFrame(records)
