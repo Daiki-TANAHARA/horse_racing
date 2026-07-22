@@ -65,4 +65,11 @@ def evaluate_model(name: str, result_path: str, odds_df: pd.DataFrame) -> None:
 if __name__ == "__main__":
     odds_df = pd.read_csv("../data/19860105-20210731_odds.csv", low_memory=False)
 
-    evaluate_model("XGBoost", "../results/xgboost_test_results.csv", odds_df)
+    model_result_paths = {
+        "XGBoost":      "../results/xgboost_test_results.csv",
+        "RandomForest": "../results/randomforest_test_results.csv",
+        "Logistic":     "../results/logistic_test_results.csv",
+    }
+
+    for model_name, path in model_result_paths.items():
+        evaluate_model(model_name, path, odds_df)
