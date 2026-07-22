@@ -11,7 +11,7 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
-from calc_roi import evaluate_roi
+from calc_roi import evaluate_roi, evaluate_roi_by_threshold, evaluate_roi_top1_by_threshold
 
 
 def evaluate_classification_metrics(test_result: pd.DataFrame, threshold: float = 0.5) -> dict:
@@ -50,16 +50,34 @@ def evaluate_model(name: str, result_path: str, odds_df: pd.DataFrame) -> None:
     test_result = pd.read_csv(result_path)
 
     print(f"\n{'='*10} {name} {'='*10}")
-
+    
     classification_metrics = evaluate_classification_metrics(test_result)
     print("--- 分類指標 ---")
     for key, value in classification_metrics.items():
         print(f"{key}: {value:.4f}")
 
+    # 全レース参加方式
     roi_result = evaluate_roi(test_result, odds_df, model_score_col="予測確率")
     print("--- 回収率 ---")
     for key, value in roi_result.items():
         print(f"{key}: {value:.2f}%")
+
+    # 閾値方式
+    threshold_result = evaluate_roi_by_threshold(
+        test_result, odds_df,
+        model_score_col="予測確率",
+        thresholds=[0.5, 0.6, 0.7, 0.8, 0.9]
+    )
+    print("--- 回収率(閾値&全頭方式) ---")
+    print(threshold_result.to_string(index=False))
+
+    threshold_result = evaluate_roi_top1_by_threshold(
+        test_result, odds_df,
+        model_score_col="予測確率",
+        thresholds=[0.5, 0.6, 0.7, 0.8, 0.9]
+    )
+    print("--- 回収率(閾値&1位方式) ---")
+    print(threshold_result.to_string(index=False))
 
 
 if __name__ == "__main__":
