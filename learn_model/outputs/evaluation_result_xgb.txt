@@ -1,0 +1,5 @@
+===== 評価結果(検証データ, XGBoost) =====
+AUC       : 0.7670
+Accuracy  : 0.7963
+Precision : 0.5833
+Recall    : 0.2331

@@ -23,7 +23,7 @@ from xgboost import plot_importance
 # 1. データ読込
 # ─────────────────────────────
 # df = pd.read_csv("preprocessed_race_result.csv", low_memory=False)
-df = pd.read_csv("../data/features.csv", low_memory=False)
+df = pd.read_csv("data/features.csv", low_memory=False)
 df["レース日付"] = pd.to_datetime(df["レース日付"])
 df = df.sort_values("レース日付")
 
@@ -128,6 +128,30 @@ features = [
     "レースグレード_L",
     "レースグレード_なし",
 ]
+
+never_used = [
+    "芝・ダート区分_芝",
+    "性別_セ",
+    "馬場状態1_稍重",
+    "馬場状態1_良",
+    "馬場状態1_重",
+    "天候_小雪",
+    "天候_曇",
+    "天候_雪",
+    "距離帯_中距離",
+    "距離帯_中長距離",
+    "距離帯_短距離",
+    "距離帯_長距離",
+    "レースグレード_G",
+    "レースグレード_L",
+]
+
+features_slim = [f for f in features if f not in never_used]
+
+print(f"元の特徴量数: {len(features)}")
+print(f"除外した数    : {len(never_used)}")
+print(f"絞り込み後    : {len(features_slim)}")
+
 target   = "複勝"
 
 # ─────────────────────────────
@@ -140,6 +164,8 @@ race_ids = (
     .to_numpy()
 )
 tscv = TimeSeriesSplit(n_splits=5)
+
+fold_importances = []  # 重要な特徴量だけ残す。
 
 results = []
 
@@ -169,14 +195,19 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     model = XGBClassifier(
         objective="binary:logistic",
         eval_metric="logloss",
-        n_estimators=100,
+        n_estimators=1000,        # 100 → 1000(早期終了前提で多めに確保)
         max_depth=4,
-        learning_rate=0.1,
-        scale_pos_weight=neg / pos,  # クラス不均衡の補正
+        learning_rate=0.03,       # 0.1 → 0.03(慎重に学習)
+        scale_pos_weight=1.0,
+        early_stopping_rounds=50, # 追加: 性能が伸びなくなったら自動で打ち切る
         random_state=42,
         verbosity=0,
     )
-    model.fit(X_train, y_train)
+    model.fit(
+        X_train, y_train,
+        eval_set=[(X_test, y_test)],
+        verbose=False,
+    )
 
     # ─────────────────────────────
     # 4. 評価
@@ -199,7 +230,27 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
           f"AUC={results[-1]['ROC-AUC']:.4f}  "
           f"Prec={results[-1]['Precision']:.4f}  "
           f"Rec={results[-1]['Recall']:.4f}")
+    
+    # このfoldの特徴量重要度を記録
+    fold_importance = pd.Series(model.feature_importances_, index=features)
+    fold_importances.append(fold_importance)
+    
 
+# ─────────────────────────────
+# 6. 全foldを通した特徴量重要度の集計
+# ─────────────────────────────
+importance_df = pd.concat(fold_importances, axis=1)
+importance_df.columns = [f"fold{i}" for i in range(1, len(fold_importances) + 1)]
+importance_df["mean"] = importance_df.mean(axis=1)
+importance_df["max"] = importance_df.max(axis=1)
+
+#print("\n=== 全fold集計:特徴量重要度(mean降順) ===")
+#print(importance_df.sort_values("mean", ascending=False).to_string())
+
+# 全foldを通して一度も使われなかった特徴量
+never_used = importance_df[importance_df["max"] == 0].index.tolist()
+print(f"\n全foldで一度も使われなかった特徴量: {len(never_used)}件")
+print(never_used)
 # ─────────────────────────────
 # 5. 集計
 # ─────────────────────────────
@@ -210,12 +261,36 @@ print(results_df.mean().to_string())
 # ─────────────────────────────
 # 6. 特徴量重要度
 # ─────────────────────────────
-importance = pd.Series(
-    model.feature_importances_, index=features
-).sort_values(ascending=False)
-print("\n=== 特徴量重要度 ===")
-print(importance.to_string())
+print("\n=== 特徴量重要度(全fold平均, 0除く) ===")
+print(
+    importance_df["mean"]
+    .sort_values(ascending=False)
+    .loc[lambda x: x > 0]
+    .to_string()
+)
 
-plot_importance(model, importance_type="gain")
+# ─────────────────────────────
+# 7. 特徴量重要度グラフ(直近fold, %表示)
+# ─────────────────────────────
+
+# --- 変更前(features_slim を手動指定していたためズレてエラーになっていた) ---
+# importance = pd.Series(
+#     model.feature_importances_, index=features_slim
+# ).sort_values(ascending=False)
+
+# --- 変更後: モデルが実際に学習した特徴量名をそのまま使う(ズレが起きない) ---
+importance = pd.Series(
+    model.feature_importances_, index=model.feature_names_in_
+).sort_values(ascending=False)
+
+importance_pct = importance * 100
+
+top_n = 20
+top_importance = importance_pct.head(top_n)
+
+plt.figure(figsize=(10, 8))
+plt.barh(top_importance.index[::-1], top_importance.values[::-1])
+plt.xlabel("重要度 (%)")
+plt.title(f"XGBoost 特徴量重要度 Top{top_n}(gain, 割合表示)")
 plt.tight_layout()
 plt.show()

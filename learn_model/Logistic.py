@@ -21,7 +21,7 @@ from sklearn.pipeline import Pipeline
 # 1. データ読込
 # ─────────────────────────────
 # df = pd.read_csv("preprocessed_race_result.csv", low_memory=False)
-df = pd.read_csv("../data/features.csv", low_memory=False)
+df = pd.read_csv("data/features.csv", low_memory=False)
 df["レース日付"] = pd.to_datetime(df["レース日付"])
 df = df.sort_values("レース日付")
 
