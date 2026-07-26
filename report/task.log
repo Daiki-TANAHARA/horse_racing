@@ -1,4 +1,4 @@
-This is e-upTeX, Version 3.141592653-p4.1.2-u2.00-250202-2.6 (utf8.euc) (TeX Live 2025) (preloaded format=platex 2025.4.9)  16 JUN 2026 09:49
+This is e-upTeX, Version 3.141592653-p4.1.2-u2.00-250202-2.6 (utf8.euc) (TeX Live 2025) (preloaded format=platex 2025.4.9)  21 JUL 2026 11:31
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -245,15 +245,15 @@ LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 
 [1]
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 18.
+(Font)              scaled to size 11.53198pt on input line 17.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 18.
+(Font)              scaled to size 11.53198pt on input line 17.
 
 
 [2
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 56--57
+Underfull \hbox (badness 10000) in paragraph at lines 55--56
 []$\OT1/cmtt/m/n/10 https : / / www . kaggle . com / datasets / takamotoki / jr
 a-[]horse-[]racing-[]dataset ? select =
  []
@@ -272,10 +272,10 @@ L3 programming layer <2025-01-18>
 Here is how much of TeX's memory you used:
  3305 strings out of 473836
  48392 string characters out of 5731190
- 447838 words of memory out of 5000000
+ 447836 words of memory out of 5000000
  26566 multiletter control sequences out of 15000+600000
  571115 words of font info for 93 fonts, out of 8000000 for 9000
  934 hyphenation exceptions out of 8191
- 57i,6n,65p,384b,266s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,6n,65p,551b,266s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on task.dvi (5 pages, 12724 bytes).
+Output written on task.dvi (5 pages, 15156 bytes).
