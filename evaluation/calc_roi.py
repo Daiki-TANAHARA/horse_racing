@@ -1,6 +1,8 @@
 """
 複勝回収率(ROI)計算のための共通関数をまとめたファイルです。
 XGBoost, RandomForest, Logisticなど、どのモデルの予測結果からも呼び出せます。
+
+(変更なし。元のファイルをそのまま使用)
 """
 import pandas as pd
 
@@ -125,17 +127,18 @@ def evaluate_roi(
     place_payout = build_place_payout_lookup(odds_df)
     test_result = attach_payout(test_result, place_payout)
 
-    model_top1   = select_top_n(test_result, model_score_col, n=1, ascending=False)
-    popular_top1 = select_top_n(test_result, "人気",           n=1, ascending=True)
-    model_top3   = select_top_n(test_result, model_score_col, n=3, ascending=False)
-    popular_top3 = select_top_n(test_result, "人気",           n=3, ascending=True)
+    model_top1 = select_top_n(test_result, model_score_col, n=1, ascending=False)
+    popular_top1 = select_top_n(test_result, "人気", n=1, ascending=True)
+    model_top3 = select_top_n(test_result, model_score_col, n=3, ascending=False)
+    popular_top3 = select_top_n(test_result, "人気", n=3, ascending=True)
 
     return {
-        "モデル1位回収率":     calc_return_rate(model_top1),
-        "人気1位回収率":       calc_return_rate(popular_top1),
+        "モデル1位回収率": calc_return_rate(model_top1),
+        "人気1位回収率": calc_return_rate(popular_top1),
         "モデル上位3頭回収率": calc_return_rate(model_top3),
-        "人気上位3頭回収率":   calc_return_rate(popular_top3),
+        "人気上位3頭回収率": calc_return_rate(popular_top3),
     }
+
 
 def select_by_threshold(
     test_result: pd.DataFrame,
@@ -161,7 +164,7 @@ def evaluate_roi_by_threshold(
     test_result: pd.DataFrame,
     odds_df: pd.DataFrame,
     model_score_col: str,
-    thresholds: list[float]
+    thresholds: list
 ) -> pd.DataFrame:
     """
     複数の閾値について、回収率とカバー率をまとめて計算する関数です。
@@ -207,6 +210,7 @@ def evaluate_roi_by_threshold(
 
     return pd.DataFrame(records)
 
+
 def select_top1_with_threshold(
     test_result: pd.DataFrame,
     score_col: str,
@@ -228,11 +232,12 @@ def select_top1_with_threshold(
     top1 = select_top_n(test_result, score_col, n=1, ascending=False)
     return top1[top1[score_col] >= threshold]
 
+
 def evaluate_roi_top1_by_threshold(
     test_result: pd.DataFrame,
     odds_df: pd.DataFrame,
     model_score_col: str,
-    thresholds: list[float]
+    thresholds: list
 ) -> pd.DataFrame:
     """
     各レースの1位馬について、複数の閾値でフィルタした場合の
