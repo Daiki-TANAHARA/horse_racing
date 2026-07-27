@@ -23,7 +23,7 @@ from xgboost import plot_importance
 # 1. データ読込
 # ─────────────────────────────
 # df = pd.read_csv("preprocessed_race_result.csv", low_memory=False)
-df = pd.read_csv("../data/features.csv", low_memory=False)
+df = pd.read_csv("data/features.csv", low_memory=False)
 df["レース日付"] = pd.to_datetime(df["レース日付"])
 df = df.sort_values("レース日付")
 
@@ -168,18 +168,11 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     pos = (y_train == 1).sum()
 
     model = XGBClassifier(
-        objective="binary:logistic",
-        eval_metric="logloss",
-        n_estimators=100,
-        max_depth=4,
-        learning_rate=0.1,
-        scale_pos_weight=neg / pos,  # クラス不均衡の補正
-        random_state=42,
-        verbosity=0,
+
     )
     model.fit(X_train, y_train)
 
-    model.save_model(f"../models/xgboost_fold{fold}.json")
+    model.save_model(f"models/xgboost_fold{fold}.json")
 
     # ─────────────────────────────
     # 4. 評価
@@ -212,7 +205,7 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
 # 5. 予測結果の保存 ← 追加
 # ─────────────────────────────
 all_test_results = pd.concat(all_test_results, ignore_index=True)
-all_test_results.to_csv("../results/xgboost_test_results.csv", index=False)
+all_test_results.to_csv("results/xgboost_test_results.csv", index=False)
 print("results/xgboost_test_results.csv を保存しました。")
 
 # ─────────────────────────────
