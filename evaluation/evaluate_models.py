@@ -1,5 +1,5 @@
 """
-各モデル(XGBoost, RandomForest, Logistic)の予測結果を読み込み、
+各モデル(XGBoost, RandomForest, Logistic, LightGBM)の予測結果を読み込み、
 評価指標(Accuracy, F1, ROC-AUC, Precision, Recall)と
 複勝回収率(モデル1位/人気1位/モデル上位3頭/人気上位3頭)をまとめて出力する関数です。
 """
@@ -85,6 +85,7 @@ if __name__ == "__main__":
 
     model_result_paths = {
         "XGBoost":      "results/xgboost_test_results.csv",
+        "LightGBM":     "results/lightgbm_test_results.csv",
         "RandomForest": "results/randomforest_test_results.csv",
         "Logistic":     "results/logistic_test_results.csv",
     }

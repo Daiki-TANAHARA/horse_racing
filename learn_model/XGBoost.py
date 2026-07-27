@@ -224,6 +224,3 @@ importance = pd.Series(
 print("\n=== 特徴量重要度 ===")
 print(importance.to_string())
 
-plot_importance(model, importance_type="gain")
-plt.tight_layout()
-plt.show()
