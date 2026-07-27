@@ -483,11 +483,17 @@ def create_target(df2:pd.DataFrame)-> pd.DataFrame:
     # 着順欠損を除去
     df2 = df2.dropna(subset=["着順"])
 
-    # 目的変数(複勝)作成
-    df2["複勝"] = (df2["着順"] <= 3).astype(int)
+    # レースごとの出走頭数
+    df2["出走頭数"] = df2.groupby("レースID")["着順"].transform("count")
 
-    # 着順削除
-    df2 = df2.drop(columns=["着順"])
+    # 目的変数(複勝)作成
+    df2["複勝"] = (
+        ((df2["出走頭数"] <= 7) & (df2["着順"] <= 2)) |
+        ((df2["出走頭数"] >= 8) & (df2["着順"] <= 3))
+        ).astype(int)
+
+    # 着順と出走頭数を削除
+    df2 = df2.drop(columns=["着順", "出走頭数"])
     return df2
 
 
