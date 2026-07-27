@@ -18,15 +18,6 @@ echo "4. XGBoost"
 echo "=================================="
 uv run learn_model/XGBoost.py
 
-echo "=================================="
-echo "5. LightGBM 前処理"
-echo "=================================="
-uv run extra_LightGBM/claude_preprocess.py
-
-echo "=================================="
-echo "6. LightGBM"
-echo "=================================="
-uv run extra_LightGBM/LightGBM.py
 
 echo "=================================="
 echo "7. 評価"
