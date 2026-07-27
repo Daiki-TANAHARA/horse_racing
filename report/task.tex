@@ -1,8 +1,9 @@
-\documentclass[a4paper, 11pt, titlepage]{jsarticle}
+\documentclass[dvipdfmx, a4paper, 11pt, titlepage]{jsarticle}
 \usepackage[dvipdfmx]{graphicx}
 \usepackage{listings}
 \usepackage{amsmath}
 \usepackage{url}
+\usepackage{booktabs}
 
 \title{知能情報実験III（データマイニング班）\\競馬複勝予測}
 \author{グループの学籍番号列挙 245725D, 245304F, 245731J, 235751J}
@@ -68,5 +69,309 @@
 
 \subsection{パラメータ調整}
 特になし
+
+\section{実験}
+\subsection{使用した特徴量}
+\begin{table}[htbp]
+  \centering
+  \caption{基本特徴量}
+  \label{tab:basic_features}
+  \begin{tabular}{ll}
+    \hline
+    特徴量名 & 説明 \\
+    \hline
+    馬齢 & 競走馬の年齢 \\
+    馬体重 & レース当日の馬体重 \\
+    馬体重増減 & 前走からの馬体重の増減 \\
+    斤量 & 負担重量 \\
+    性別 & 牡・牝・セン \\
+    距離 & レース距離(m) \\
+    芝・ダート区分 & 芝コースかダートコースか \\
+    枠番 & 出走時の枠番号 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{レース条件に関する特徴量}
+  \label{tab:race_condition_features}
+  \begin{tabular}{ll}
+    \hline
+    特徴量名 & 説明 \\
+    \hline
+    競馬場名 & 開催競馬場 \\
+    馬場状態 & 良・稍重・重・不良 \\
+    天候 & レース当日の天候 \\
+    右左回り・直線区分 & コースの回り方向 \\
+    距離帯 & 距離を5区分にカテゴリ化(短距離・マイル・中距離・中長距離・長距離) \\
+    レースクラス & 新馬・未勝利・1〜3勝クラス・オープンの6区分 \\
+    レースグレード & G1・G2・G3・L・なしの5区分 \\
+    休養日数 & 前走からの日数 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{過去成績に基づく特徴量}
+  \label{tab:past_performance_features}
+  \begin{tabular}{ll}
+    \hline
+    特徴量名 & 説明 \\
+    \hline
+    過去3走・5走平均着順 & 直近の平均着順 \\
+    過去3走・5走複勝率 & 直近の複勝(3着以内)率 \\
+    過去3走・5走平均上り & 直近のラスト3F平均タイム \\
+    騎手複勝率 & 騎手の通算複勝率 \\
+    調教師複勝率 & 調教師の通算複勝率 \\
+    芝・ダート別複勝率 & 芝/ダート別の複勝率 \\
+    距離帯別複勝率 & 距離帯別の複勝率 \\
+    競馬場別複勝率 & 競馬場別の複勝率 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+すべての過去成績に基づく特徴量は、対象レースより過去のデータのみを用いて算出しており、
+未来の情報が混入しないよう\texttt{shift}処理を施している。
+
+\begin{table}[htbp]
+  \centering
+  \caption{同一レース内での相対化特徴量}
+  \label{tab:relative_features}
+  \begin{tabular}{ll}
+    \hline
+    特徴量名 & 説明 \\
+    \hline
+    順位率 & 同一レース内でのパーセンタイル順位(0に近いほど上位) \\
+    標準化 & 同一レース内での標準化得点(Zスコア) \\
+    \hline
+  \end{tabular}
+\end{table}
+上記の過去成績特徴量および馬体重・斤量・馬齢・休養日数について、
+同一レースに出走する馬同士で比較した相対値を追加で作成した。
+\subsection{実験結果}
+
+\subsubsection{実験1:ベースライン}
+
+使用した特徴量:馬齢, 馬体重, 距離(m), 芝・ダート区分
+
+\begin{table}[htbp]
+  \centering
+  \caption{実験1の結果}
+  \label{tab:exp1}
+  \begin{tabular}{lccccc}
+    \toprule
+    モデル & Accuracy & F1 & ROC-AUC & Precision & Recall \\
+    \midrule
+    XGBoost           & 0.4794 & 0.3544 & 0.5595 & 0.2427 & 0.6565 \\
+    Random Forest     & 0.5012 & 0.3363 & 0.5408 & 0.2367 & 0.5804 \\
+    ロジスティック回帰 & 0.4637 & 0.3544 & 0.5569 & 0.2401 & 0.6762 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{実験2:市場予想(単勝オッズ・人気)の追加}
+
+実験1の特徴量に加え、単勝オッズ・人気を追加した。
+
+\begin{table}[htbp]
+  \centering
+  \caption{実験2の結果}
+  \label{tab:exp2}
+  \begin{tabular}{lccccc}
+    \toprule
+    モデル & Accuracy & F1 & ROC-AUC & Precision & Recall \\
+    \midrule
+    XGBoost           & 0.7390 & 0.5456 & 0.8100 & 0.4393 & 0.7196 \\
+    Random Forest     & 0.7551 & 0.4730 & 0.7611 & 0.4449 & 0.5048 \\
+    ロジスティック回帰 & 0.7101 & 0.5368 & 0.8068 & 0.4115 & 0.7719 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{実験3:市場予想を除外した特徴量}
+
+単勝オッズ・人気を除外し、代わりに斤量, 馬体重増減, 枠番, 休養日数, 性別,
+競馬場名, 馬場状態, 天候, 右左回り・直線区分, 距離帯, レースクラス, レースグレード
+を追加した。
+
+\begin{table}[htbp]
+  \centering
+  \caption{実験3の結果}
+  \label{tab:exp3}
+  \begin{tabular}{lccccc}
+    \toprule
+    モデル & Accuracy & F1 & ROC-AUC & Precision & Recall \\
+    \midrule
+    XGBoost           & 0.5448 & 0.3724 & 0.6009 & 0.2660 & 0.6203 \\
+    Random Forest     & 0.7145 & 0.2233 & 0.5655 & 0.2737 & 0.1885 \\
+    ロジスティック回帰 & 0.4681 & 0.3660 & 0.5770 & 0.2471 & 0.7053 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{実験4:過去成績特徴量の追加}
+
+実験3の特徴量に加え、過去平均着順, 過去複勝率, 調教師複勝率, 騎手複勝率,
+距離帯別複勝率, 過去平均上り, 芝・ダート別複勝率, 競馬場別複勝率を追加した。
+
+\begin{table}[htbp]
+  \centering
+  \caption{実験4の結果}
+  \label{tab:exp4}
+  \begin{tabular}{lccccc}
+    \toprule
+    モデル & Accuracy & F1 & ROC-AUC & Precision & Recall \\
+    \midrule
+    XGBoost           & 0.7069 & 0.4806 & 0.7449 & 0.3913 & 0.6230 \\
+    Random Forest     & 0.7712 & 0.4106 & 0.7356 & 0.4674 & 0.3662 \\
+    ロジスティック回帰 & 0.7025 & 0.4667 & 0.7295 & 0.3827 & 0.5981 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{実験5:同一レース内での相対化}
+
+過去成績や馬体重などの特徴量について、同一レース内での順位率・標準化を追加した。
+
+\begin{table}[htbp]
+  \centering
+  \caption{実験5の結果}
+  \label{tab:exp5}
+  \begin{tabular}{lccccc}
+    \toprule
+    モデル & Accuracy & F1 & ROC-AUC & Precision & Recall \\
+    \midrule
+    XGBoost           & 0.7110 & 0.4957 & 0.7612 & 0.3997 & 0.6524 \\
+    Random Forest     & 0.7761 & 0.4358 & 0.7525 & 0.4825 & 0.3973 \\
+    ロジスティック回帰 & 0.7028 & 0.4864 & 0.7492 & 0.3898 & 0.6466 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{実験6:回収率による評価}
+
+実験5のモデルを用いて、閾値方式による複勝回収率を評価した。
+実験5のモデルを用いて、モデルの予測確率が一定の閾値を超えた場合にのみ
+馬券を購入したと仮定し、複勝回収率を評価した。
+購入方法として、以下の2種類を比較した。
+
+\begin{itemize}
+  \item \textbf{全頭方式}:閾値を超えた馬を、1レースにつき複数頭でも
+        すべて購入する方式(該当馬が0頭のレースは購入しない)。
+  \item \textbf{1位方式}:各レースで予測確率が最も高い馬のみを対象とし、
+        その馬の予測確率が閾値を超えている場合にのみ購入する方式
+        (1レースにつき購入は0頭または1頭のみ)。
+\end{itemize}
+
+いずれの方式も、1頭(1点)あたり100円を購入したものと仮定し、
+以下の式で回収率を算出した。
+
+\[
+  \text{回収率} = \frac{\text{総払戻金}}{\text{総購入金額}} \times 100
+\]
+
+なお、閾値を高く設定するほど購入対象となる頭数(レース数)は減少するため、
+回収率とあわせて実際に賭けた頭数・購入レース数も併記する。
+
+
+\subsubsection*{XGBoost}
+
+表~\ref{tab:exp6_xgb_all}に全頭方式、表~\ref{tab:exp6_xgb_top1}に1位方式の結果を示す。
+
+\begin{table}[htbp]
+  \centering
+  \caption{実験6:XGBoost 回収率(閾値\&全頭方式)}
+  \label{tab:exp6_xgb_all}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)   & 80.05 & 80.43 & 81.17 & 82.84 & 85.65 \\
+    賭けた頭数   & 475{,}808 & 317{,}233 & 177{,}845 & 68{,}606 & 8{,}332 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{実験6:XGBoost 回収率(閾値\&1位方式)}
+  \label{tab:exp6_xgb_top1}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)     & 81.16 & 81.24 & 81.47 & 82.70 & 85.61 \\
+    購入レース数   & 97{,}535 & 96{,}248 & 86{,}245 & 51{,}705 & 8{,}081 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection*{Random Forest}
+
+表~\ref{tab:exp6_rf_all}に全頭方式、表~\ref{tab:exp6_rf_top1}に1位方式の結果を示す。
+
+\begin{table}[htbp]
+  \centering
+  \caption{実験6:Random Forest 回収率(閾値\&全頭方式)}
+  \label{tab:exp6_rf_all}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)   & 80.09 & 80.91 & 82.66 & 83.83 & 89.44 \\
+    賭けた頭数   & 240{,}000 & 109{,}079 & 37{,}422 & 7{,}935 & 557 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{実験6:Random Forest 回収率(閾値\&1位方式)}
+  \label{tab:exp6_rf_top1}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)     & 80.28 & 80.90 & 82.40 & 83.70 & 89.39 \\
+    購入レース数   & 93{,}657 & 68{,}701 & 31{,}154 & 7{,}527 & 555 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection*{ロジスティック回帰}
+
+表~\ref{tab:exp6_logistic_all}に全頭方式、表~\ref{tab:exp6_logistic_top1}に1位方式の結果を示す。
+
+
+\begin{table}[htbp]
+  \centering
+  \caption{実験6:ロジスティック回帰 回収率(閾値\&全頭方式)}
+  \label{tab:exp6_logistic_all}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)   & 79.33 & 79.31 & 80.09 & 81.19 & 84.39 \\
+    賭けた頭数   & 483{,}452 & 299{,}497 & 160{,}847 & 62{,}786 & 8{,}634 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{実験6:ロジスティック回帰 回収率(閾値\&1位方式)}
+  \label{tab:exp6_logistic_top1}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)     & 79.81 & 79.91 & 80.36 & 81.18 & 84.43 \\
+    購入レース数   & 97{,}572 & 95{,}383 & 84{,}069 & 51{,}026 & 8{,}539 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 
 \end{document}
