@@ -20,7 +20,7 @@ import joblib
 # 1. データ読込
 # ─────────────────────────────
 # df = pd.read_csv("preprocessed_race_result.csv", low_memory=False)
-df = pd.read_csv("../data/features.csv", low_memory=False)
+df = pd.read_csv("data/features.csv", low_memory=False)
 df["レース日付"] = pd.to_datetime(df["レース日付"])
 df = df.sort_values("レース日付")
 
@@ -172,7 +172,7 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     )
     model.fit(X_train, y_train)
 
-    joblib.dump(model, f"../models/randomforest_fold{fold}.joblib")
+    joblib.dump(model, f"models/randomforest_fold{fold}.joblib")
 
     # ─────────────────────────────
     # 4. 評価
@@ -205,7 +205,7 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
 # 5. 予測結果の保存 ← 追加
 # ─────────────────────────────
 all_test_results = pd.concat(all_test_results, ignore_index=True)
-all_test_results.to_csv("../results/randomforest_test_results.csv", index=False)
+all_test_results.to_csv("results/randomforest_test_results.csv", index=False)
 print("results/randomforest_test_results.csv を保存しました。")
 
 # ─────────────────────────────

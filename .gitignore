@@ -15,3 +15,6 @@ results/*.csv
 # Models
 models/*
 !models/.gitkeep
+
+Preprocess/feature_extraction.py
+Preprocess/test_preprocess.py
