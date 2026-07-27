@@ -77,11 +77,13 @@ features = [
     "馬体重標準化",
     "馬体重増減標準化",
     "休養日数標準化",
+
+    "馬番",
 ]
 
 # 生データを読み込む
 df = pd.read_csv(
-    "../data/19860105-20210731_race_result.csv",
+    "data/19860105-20210731_race_result.csv",
     low_memory=False
 )
 
@@ -92,7 +94,7 @@ print(df["レース日付"].head())
 df = preprocess(df, features)
 
 # 前処理済みデータを保存
-df.to_csv("../data/features.csv", index=False)
+df.to_csv("data/features.csv", index=False)
 
 print("features.csv を作成しました。")
 

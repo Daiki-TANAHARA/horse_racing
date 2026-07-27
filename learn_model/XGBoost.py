@@ -23,7 +23,7 @@ from xgboost import plot_importance
 # 1. データ読込
 # ─────────────────────────────
 # df = pd.read_csv("preprocessed_race_result.csv", low_memory=False)
-df = pd.read_csv("../data/features.csv", low_memory=False)
+df = pd.read_csv("data/features.csv", low_memory=False)
 df["レース日付"] = pd.to_datetime(df["レース日付"])
 df = df.sort_values("レース日付")
 
@@ -142,6 +142,7 @@ race_ids = (
 tscv = TimeSeriesSplit(n_splits=5)
 
 results = []
+all_test_results = []
 
 for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     train_df = df[df["レースID"].isin(race_ids[train_idx])]
@@ -167,22 +168,22 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     pos = (y_train == 1).sum()
 
     model = XGBClassifier(
-        objective="binary:logistic",
-        eval_metric="logloss",
-        n_estimators=100,
-        max_depth=4,
-        learning_rate=0.1,
-        scale_pos_weight=neg / pos,  # クラス不均衡の補正
-        random_state=42,
-        verbosity=0,
+
     )
     model.fit(X_train, y_train)
+
+    model.save_model(f"models/xgboost_fold{fold}.json")
 
     # ─────────────────────────────
     # 4. 評価
     # ─────────────────────────────
     pred_proba = model.predict_proba(X_test)[:, 1]
     pred_label = model.predict(X_test)
+
+    test_result = test_df[["レースID", "レース日付", "馬番", "人気", "複勝"]].copy()
+    test_result["予測確率"] = pred_proba
+    test_result["Fold"] = fold
+    all_test_results.append(test_result)
 
     results.append({
         "Fold":      fold,
@@ -201,14 +202,21 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
           f"Rec={results[-1]['Recall']:.4f}")
 
 # ─────────────────────────────
-# 5. 集計
+# 5. 予測結果の保存 ← 追加
+# ─────────────────────────────
+all_test_results = pd.concat(all_test_results, ignore_index=True)
+all_test_results.to_csv("results/xgboost_test_results.csv", index=False)
+print("results/xgboost_test_results.csv を保存しました。")
+
+# ─────────────────────────────
+# 6. 集計
 # ─────────────────────────────
 results_df = pd.DataFrame(results).set_index("Fold")
 print("\n=== XGBoost 平均スコア ===")
 print(results_df.mean().to_string())
 
 # ─────────────────────────────
-# 6. 特徴量重要度
+# 7. 特徴量重要度
 # ─────────────────────────────
 importance = pd.Series(
     model.feature_importances_, index=features
