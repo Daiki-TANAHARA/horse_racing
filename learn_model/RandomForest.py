@@ -162,11 +162,6 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     # 3. モデル定義・学習
     # ─────────────────────────────
     model = RandomForestClassifier(
-        n_estimators=200,
-        max_depth=6,
-        min_samples_leaf=20,
-        max_features="sqrt",
-        class_weight="balanced",  # クラス不均衡の補正
         random_state=42,
         n_jobs=-1,
     )
