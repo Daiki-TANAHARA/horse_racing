@@ -1,0 +1,831 @@
+\documentclass[dvipdfmx, a4paper, 11pt, titlepage]{jsarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{float}
+
+\title{知能情報実験III（データマイニング班）\\競馬複勝予測}
+\author{グループの学籍番号列挙 245725D, 245304F, 245731J, 235751J}
+\date{提出日：2026年6月9日}
+\begin{document}
+\maketitle
+\tableofcontents
+\clearpage
+
+
+\section{本実験向け補足}
+
+\subsection{競馬複勝予測とは}
+本グループでは、競馬における馬の複勝率予測を対象問題として設定した。複勝とは、出走した馬が3着以内に入るかどうかを予測する馬券の種類であり、単勝や馬連と比較して的中しやすい特徴を持つ。本テーマでは、過去の競馬データを用いて、各馬が複勝するか否かを機械学習によって分類することを目的とする。
+競馬では、馬の年齢や体重、レース距離、天候、馬場状態など多くの要因がレース結果に影響すると考えられている。しかし、人間がこれらの膨大な情報を総合的に判断して予測を行うことは容易ではない。そこで、機械学習を活用することで、多数の説明変数から複勝に関係する特徴を学習し、客観的な予測を行うことが可能となる。
+
+本テーマに取り組む意義は、実際の競馬予想への応用だけでなく、多数の特徴量を持つ実データに対して分類モデルを適用し、その性能や特徴量の重要度を分析できる点にある。これにより、機械学習を用いた予測手法の有効性を検証するとともに、データ分析の実践的な知識を深めることができる。
+
+\subsection{実験計画}
+\section{実験計画と改善（PDCA）}
+
+本研究では，一度モデルを作成して終わりではなく，実験結果を分析し，改善を繰り返すPDCAサイクルを意識して開発を進めた．各回の実験内容と，それを踏まえた改善内容を以下に示す．
+
+\subsection{第1回：ベースラインモデルの構築（Plan・Do）}
+
+まず，競馬データをダウンロードし，最低限の特徴量として「馬体重」「天候」「馬齢」「距離」「芝・ダート区分」「着順」を抽出した．また，着順が3着以内であれば複勝フラグを1，それ以外を0として教師データを作成した．
+
+その後，ロジスティック回帰，Random Forest，XGBoostの3種類のモデルを実装し，Accuracy，F1-score，ROC-AUC，Precision，Recallの5つの指標で性能評価を行った．さらに，特徴量重要度を確認し，予測に大きく影響する特徴量を分析した．
+
+\begin{itemize}
+    \item \textbf{Check}：基本的な学習・評価環境を構築できたが，特徴量が少なく予測性能には改善の余地があることが分かった．
+    \item \textbf{Action}：予測性能向上のため，新たな特徴量を追加することにした．
+\end{itemize}
+
+\subsection{第2回：人気・単勝オッズの追加（Do・Check）}
+
+特徴量として「人気」と「単勝オッズ」を追加し，再度学習・評価を行った．
+
+\begin{itemize}
+    \item \textbf{Check}：モデル性能は向上したが，人気や単勝オッズは人の予想が反映された情報であり，本来予測したい馬自身の能力とは異なる情報に強く依存していることが分かった．
+    \item \textbf{Action}：人の判断が介在する特徴量を除外し，馬自身の能力を表す特徴量のみで予測できるモデルを目指すことにした．
+\end{itemize}
+
+\subsection{第3回：特徴量の見直し（Plan・Do）}
+
+人気と単勝オッズを削除し，生データに含まれる特徴量のみを用いてモデルを再構築した．また，生データに存在する他の特徴量も追加し，情報量の増加を図った．
+
+\begin{itemize}
+    \item \textbf{Check}：人の予想情報に依存しないモデルとなったが，単一レースの情報だけでは馬の実力を十分に表現できないことが分かった．
+    \item \textbf{Action}：各馬の過去成績を特徴量として追加することにした．
+\end{itemize}
+
+\subsection{第4回：過去成績の追加（Do）}
+
+馬ごとの過去成績を特徴量として追加した．具体的には，過去の平均着順や複勝率などを計算し，現在のレース予測に利用した．
+
+\begin{itemize}
+    \item \textbf{Check}：過去成績を追加することで，馬の実力をより適切に表現できるようになった．しかし，絶対値だけではレース内での相対的な強さを十分に表現できていないことが分かった．
+    \item \textbf{Action}：同一レース内で比較しやすい特徴量へ変換することにした．
+\end{itemize}
+
+\subsection{第5回：過去成績の相対化（Do・Check）}
+
+過去成績を同一レース内で比較できるように加工した．具体的には，過去成績をレースごとに標準化するとともに，順位付けを行い，0から1の範囲に正規化した特徴量を作成した．
+
+\begin{itemize}
+    \item \textbf{Check}：各馬の実力を同一レース内で比較しやすくなり，特徴量の表現力が向上した．
+    \item \textbf{Action}：モデル性能だけでなく，実際の馬券購入を想定した評価指標も導入することにした．
+\end{itemize}
+
+\subsection{第6回：回収率による評価（Do）}
+
+AccuracyやROC-AUCなどの機械学習指標に加え，各モデルについて馬券の回収率を算出し，実運用を意識した評価を行った．
+
+\begin{itemize}
+    \item \textbf{Check}：分類性能が高いモデルと，実際の回収率が高いモデルは必ずしも一致しないことが分かった．
+    \item \textbf{Action}：回収率も考慮しながら，モデル性能をさらに改善するため，ハイパーパラメータ調整を実施することにした．
+\end{itemize}
+
+\subsection{第7回：ハイパーパラメータ調整（Act）}
+
+各モデルについてハイパーパラメータを調整し，デフォルト設定との性能比較を行った．
+
+\begin{itemize}
+    \item \textbf{Check}：パラメータ調整による性能向上の効果を確認し，各モデルの特性や最適な設定について理解を深めることができた．
+    \item \textbf{Action}：今後は特徴量のさらなる改善や特徴量選択，アンサンブル手法なども検討し，回収率を含めた総合的な性能向上を目指す．
+\end{itemize}
+
+\subsection{実験目的}
+本実験の目的は、競馬の過去データを用いて機械学習モデルを構築し、出走馬が複勝（3着以内に入着）するかどうかを予測できるかを検証することである。競馬のレース結果には、馬齢、馬体重、距離、天候、馬場状態など多くの要因が関係していると考えられるため、これらの特徴量から複勝の可否を予測する分類モデルを作成する。
+また、複数の特徴量を用いた機械学習によってどの程度の予測性能が得られるのかを評価するとともに、どの特徴量が複勝予測に大きく影響しているのかを分析することも目的とする。さらに、異なる機械学習手法や前処理方法を比較し、それらが予測精度に与える影響を検証する。
+これらの実験を通して、競馬における複勝予測の実現可能性を確認するとともに、実データを対象とした機械学習モデル構築の有効性について考察する。
+
+\subsection{実験手順}
+
+第三者が実験を再現するための手順を以下に示す．
+
+\begin{enumerate}
+    \item GitHubリポジトリを取得する．
+
+\begin{verbatim}
+git clone <リポジトリURL>
+cd horse_racing
+\end{verbatim}
+
+    \item 必要なライブラリをインストールする．
+
+\begin{verbatim}
+uv sync
+\end{verbatim}
+
+    \item Kaggleから以下のファイルをダウンロードし，\texttt{data}ディレクトリに配置する．
+
+    \begin{itemize}
+        \item \texttt{19860105-20210731\_race\_result.csv}
+        \item \texttt{19860105-20210731\_odds.csv}
+    \end{itemize}
+
+    \item 再現したい実験に対応するコミットへ移動する．
+
+\begin{verbatim}
+git checkout <コミットID>
+\end{verbatim}
+
+    \item コミットに対応した実験を実行する．
+
+    \begin{itemize}
+        \item 最終コミット版
+
+\begin{verbatim}
+uv run python Preprocess/make_features.py
+uv run python learn_model/XGBoost.py --max_depth 7 --learning_rate 0.07
+uv run python evaluation/evaluate_models.py
+\end{verbatim}
+
+        \item 最終一歩手前のコミット版
+
+\begin{verbatim}
+./run_all.sh
+\end{verbatim}
+
+    \end{itemize}
+
+\end{enumerate}
+
+\subsection{データセット}
+\url{https://www.kaggle.com/datasets/takamotoki/jra-horse-racing-dataset?select=19860105-20210731_race_result.csv}
+
+本実験では，以下の2つのファイルを利用する．
+
+
+\begin{enumerate}
+    \item \texttt{19860105-20210731\_race\_result.csv}
+
+    各レースに出走した馬ごとの情報が記録されているファイルである．
+    馬体重，馬体重増減，馬齢，競馬場，距離，天候，馬場状態，騎手など，多数の説明変数が含まれている．
+
+    \item \texttt{19860105-20210731\_odds.csv}
+
+    各レースのオッズ情報が記録されているファイルである．本研究では単勝オッズなどの情報を取得するために利用した．
+\end{enumerate}
+
+\subsection{モデル}
+\begin{itemize}
+ \item ロジスティック回帰
+ \item XGBoost
+ \item RandomForest
+ \end{itemize}
+
+
+\subsection{パラメータ調整}
+
+\subsection{方針}
+ 
+時間的制約から、パラメータ調整はXGBoostのみを対象とした。調整は1項目ずつ値を振り、分類指標(Accuracy, F1, ROC-AUC, Precision, Recall)と複勝回収率(モデル1位・人気1位・モデル上位3頭・人気上位3頭)の変化をグラフで確認しながら、最善と判断した値を次の項目のベースラインに固定して進める、座標降下的な手順を取った。項目の順序は、木の本数$\to$木の深さ$\to$learning\_rate$\to$scale\_pos\_weight$\to$L2正則化$\to$L1正則化である。
+ 
+評価にあたっては、回収率の絶対的な最大値だけでなく、AUC・F1・Recallとのトレードオフを重視した。回収率がほぼ変わらないにもかかわらず分類指標(特にRecall)が大きく悪化する場合は、過学習のサインとみなし、より保守的な値を採用する方針とした。具体的な結果・考察・採用値は次の「実験結果」章にまとめる。
+ 
+\subsection{木の本数 (n\_estimators)}
+ 
+100 $\to$ 1000に変更した。木の本数を増やすこと自体に悪影響はないと判断し、個別の検証・グラフ化は行わなかった。
+ 
+\subsection{木の深さ (max\_depth)}
+ 
+候補として4〜10を設定し、learning\_rateはデフォルト値(0.1)に固定して実施した。
+ 
+\subsection{learning\_rate}
+ 
+候補は0.1以下(0.01, 0.03, 0.05, 0.07, 0.1)とした。初回はmax\_depthの調整結果を反映する前だったため、暫定的にdepth=10で実施した。しかしdepthとlearning\_rateには交互作用があり、片方を固定したまま他方だけを見て結論を出すのは適切でないと判断し、max\_depth=7を確定させたうえで再度スイープを行った。
+ 
+\subsection{scale\_pos\_weight}
+ 
+候補としてauto(neg/pos, 既定)、1.5、1.2、1.0を設定し、max\_depth=7、learning\_rate=0.07で実施した。
+ 
+\subsection{L2正則化 (reg\_lambda)}
+ 
+候補として0, 0.5, 1, 5を設定し、max\_depth=7、learning\_rate=0.07、scale\_pos\_weight=autoで実施した。
+ 
+\subsection{L1正則化 (reg\_alpha)}
+ 
+候補として0, 0.5, 1, 5を設定し、max\_depth=7、learning\_rate=0.07、scale\_pos\_weight=autoで実施した。
+
+
+\section{実験}
+\subsection{使用した特徴量}
+\begin{table}[H]
+  \centering
+  \caption{基本特徴量}
+  \label{tab:basic_features}
+  \begin{tabular}{ll}
+    \hline
+    特徴量名 & 説明 \\
+    \hline
+    馬齢 & 競走馬の年齢 \\
+    馬体重 & レース当日の馬体重 \\
+    馬体重増減 & 前走からの馬体重の増減 \\
+    斤量 & 負担重量 \\
+    性別 & 牡・牝・セン \\
+    距離 & レース距離(m) \\
+    芝・ダート区分 & 芝コースかダートコースか \\
+    枠番 & 出走時の枠番号 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{レース条件に関する特徴量}
+  \label{tab:race_condition_features}
+  \begin{tabular}{ll}
+    \hline
+    特徴量名 & 説明 \\
+    \hline
+    競馬場名 & 開催競馬場 \\
+    馬場状態 & 良・稍重・重・不良 \\
+    天候 & レース当日の天候 \\
+    右左回り・直線区分 & コースの回り方向 \\
+    距離帯 & 距離を5区分にカテゴリ化(短距離・マイル・中距離・中長距離・長距離) \\
+    レースクラス & 新馬・未勝利・1〜3勝クラス・オープンの6区分 \\
+    レースグレード & G1・G2・G3・L・なしの5区分 \\
+    休養日数 & 前走からの日数 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{過去成績に基づく特徴量}
+  \label{tab:past_performance_features}
+  \begin{tabular}{ll}
+    \hline
+    特徴量名 & 説明 \\
+    \hline
+    過去3走・5走平均着順 & 直近の平均着順 \\
+    過去3走・5走複勝率 & 直近の複勝(3着以内)率 \\
+    過去3走・5走平均上り & 直近のラスト3F平均タイム \\
+    騎手複勝率 & 騎手の通算複勝率 \\
+    調教師複勝率 & 調教師の通算複勝率 \\
+    芝・ダート別複勝率 & 芝/ダート別の複勝率 \\
+    距離帯別複勝率 & 距離帯別の複勝率 \\
+    競馬場別複勝率 & 競馬場別の複勝率 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+すべての過去成績に基づく特徴量は、対象レースより過去のデータのみを用いて算出しており、
+未来の情報が混入しないよう\texttt{shift}処理を施している。
+
+\begin{table}[H]
+  \centering
+  \caption{同一レース内での相対化特徴量}
+  \label{tab:relative_features}
+  \begin{tabular}{ll}
+    \hline
+    特徴量名 & 説明 \\
+    \hline
+    順位率 & 同一レース内でのパーセンタイル順位(0に近いほど上位) \\
+    標準化 & 同一レース内での標準化得点(Zスコア) \\
+    \hline
+  \end{tabular}
+\end{table}
+上記の過去成績特徴量および馬体重・斤量・馬齢・休養日数について、
+同一レースに出走する馬同士で比較した相対値を追加で作成した。
+\subsection{実験結果}
+
+\subsubsection{実験1:ベースライン}
+
+使用した特徴量:馬齢, 馬体重, 距離(m), 芝・ダート区分
+
+\begin{table}[H]
+  \centering
+  \caption{実験1の結果}
+  \label{tab:exp1}
+  \begin{tabular}{lccccc}
+    \toprule
+    モデル & Accuracy & F1 & ROC-AUC & Precision & Recall \\
+    \midrule
+    XGBoost           & 0.4794 & 0.3544 & 0.5595 & 0.2427 & 0.6565 \\
+    Random Forest     & 0.5012 & 0.3363 & 0.5408 & 0.2367 & 0.5804 \\
+    ロジスティック回帰 & 0.4637 & 0.3544 & 0.5569 & 0.2401 & 0.6762 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{実験2:市場予想(単勝オッズ・人気)の追加}
+
+実験1の特徴量に加え、単勝オッズ・人気を追加した。
+
+\begin{table}[H]
+  \centering
+  \caption{実験2の結果}
+  \label{tab:exp2}
+  \begin{tabular}{lccccc}
+    \toprule
+    モデル & Accuracy & F1 & ROC-AUC & Precision & Recall \\
+    \midrule
+    XGBoost           & 0.7390 & 0.5456 & 0.8100 & 0.4393 & 0.7196 \\
+    Random Forest     & 0.7551 & 0.4730 & 0.7611 & 0.4449 & 0.5048 \\
+    ロジスティック回帰 & 0.7101 & 0.5368 & 0.8068 & 0.4115 & 0.7719 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{実験3:市場予想を除外した特徴量}
+
+単勝オッズ・人気を除外し、代わりに斤量, 馬体重増減, 枠番, 休養日数, 性別,
+競馬場名, 馬場状態, 天候, 右左回り・直線区分, 距離帯, レースクラス, レースグレード
+を追加した。
+
+\begin{table}[H]
+  \centering
+  \caption{実験3の結果}
+  \label{tab:exp3}
+  \begin{tabular}{lccccc}
+    \toprule
+    モデル & Accuracy & F1 & ROC-AUC & Precision & Recall \\
+    \midrule
+    XGBoost           & 0.5448 & 0.3724 & 0.6009 & 0.2660 & 0.6203 \\
+    Random Forest     & 0.7145 & 0.2233 & 0.5655 & 0.2737 & 0.1885 \\
+    ロジスティック回帰 & 0.4681 & 0.3660 & 0.5770 & 0.2471 & 0.7053 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{実験4:過去成績特徴量の追加}
+
+実験3の特徴量に加え、過去平均着順, 過去複勝率, 調教師複勝率, 騎手複勝率,
+距離帯別複勝率, 過去平均上り, 芝・ダート別複勝率, 競馬場別複勝率を追加した。
+
+\begin{table}[H]
+  \centering
+  \caption{実験4の結果}
+  \label{tab:exp4}
+  \begin{tabular}{lccccc}
+    \toprule
+    モデル & Accuracy & F1 & ROC-AUC & Precision & Recall \\
+    \midrule
+    XGBoost           & 0.7069 & 0.4806 & 0.7449 & 0.3913 & 0.6230 \\
+    Random Forest     & 0.7712 & 0.4106 & 0.7356 & 0.4674 & 0.3662 \\
+    ロジスティック回帰 & 0.7025 & 0.4667 & 0.7295 & 0.3827 & 0.5981 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{実験5:同一レース内での相対化}
+
+過去成績や馬体重などの特徴量について、同一レース内での順位率・標準化を追加した。
+
+\begin{table}[H]
+  \centering
+  \caption{実験5の結果}
+  \label{tab:exp5}
+  \begin{tabular}{lccccc}
+    \toprule
+    モデル & Accuracy & F1 & ROC-AUC & Precision & Recall \\
+    \midrule
+    XGBoost           & 0.7110 & 0.4957 & 0.7612 & 0.3997 & 0.6524 \\
+    Random Forest     & 0.7761 & 0.4358 & 0.7525 & 0.4825 & 0.3973 \\
+    ロジスティック回帰 & 0.7028 & 0.4864 & 0.7492 & 0.3898 & 0.6466 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{実験6:回収率による評価}
+
+実験5のモデルを用いて、閾値方式による複勝回収率を評価した。
+実験5のモデルを用いて、モデルの予測確率が一定の閾値を超えた場合にのみ
+馬券を購入したと仮定し、複勝回収率を評価した。
+購入方法として、以下の2種類を比較した。
+
+\begin{itemize}
+  \item \textbf{全頭方式}:閾値を超えた馬を、1レースにつき複数頭でも
+        すべて購入する方式(該当馬が0頭のレースは購入しない)。
+  \item \textbf{1位方式}:各レースで予測確率が最も高い馬のみを対象とし、
+        その馬の予測確率が閾値を超えている場合にのみ購入する方式
+        (1レースにつき購入は0頭または1頭のみ)。
+\end{itemize}
+
+いずれの方式も、1頭(1点)あたり100円を購入したものと仮定し、
+以下の式で回収率を算出した。
+
+\[
+  \text{回収率} = \frac{\text{総払戻金}}{\text{総購入金額}} \times 100
+\]
+
+なお、閾値を高く設定するほど購入対象となる頭数(レース数)は減少するため、
+回収率とあわせて実際に賭けた頭数・購入レース数も併記する。
+
+
+\subsubsection*{XGBoost}
+
+表~\ref{tab:exp6_xgb_all}に全頭方式、表~\ref{tab:exp6_xgb_top1}に1位方式の結果を示す。
+
+\begin{table}[H]
+  \centering
+  \caption{実験6:XGBoost 回収率(閾値\&全頭方式)}
+  \label{tab:exp6_xgb_all}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)   & 80.05 & 80.43 & 81.17 & 82.84 & 85.65 \\
+    賭けた頭数   & 475{,}808 & 317{,}233 & 177{,}845 & 68{,}606 & 8{,}332 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{実験6:XGBoost 回収率(閾値\&1位方式)}
+  \label{tab:exp6_xgb_top1}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)     & 81.16 & 81.24 & 81.47 & 82.70 & 85.61 \\
+    購入レース数   & 97{,}535 & 96{,}248 & 86{,}245 & 51{,}705 & 8{,}081 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection*{Random Forest}
+
+表~\ref{tab:exp6_rf_all}に全頭方式、表~\ref{tab:exp6_rf_top1}に1位方式の結果を示す。
+
+\begin{table}[H]
+  \centering
+  \caption{実験6:Random Forest 回収率(閾値\&全頭方式)}
+  \label{tab:exp6_rf_all}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)   & 80.09 & 80.91 & 82.66 & 83.83 & 89.44 \\
+    賭けた頭数   & 240{,}000 & 109{,}079 & 37{,}422 & 7{,}935 & 557 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{実験6:Random Forest 回収率(閾値\&1位方式)}
+  \label{tab:exp6_rf_top1}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)     & 80.28 & 80.90 & 82.40 & 83.70 & 89.39 \\
+    購入レース数   & 93{,}657 & 68{,}701 & 31{,}154 & 7{,}527 & 555 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection*{ロジスティック回帰}
+
+表~\ref{tab:exp6_logistic_all}に全頭方式、表~\ref{tab:exp6_logistic_top1}に1位方式の結果を示す。
+
+
+\begin{table}[H]
+  \centering
+  \caption{実験6:ロジスティック回帰 回収率(閾値\&全頭方式)}
+  \label{tab:exp6_logistic_all}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)   & 79.33 & 79.31 & 80.09 & 81.19 & 84.39 \\
+    賭けた頭数   & 483{,}452 & 299{,}497 & 160{,}847 & 62{,}786 & 8{,}634 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{実験6:ロジスティック回帰 回収率(閾値\&1位方式)}
+  \label{tab:exp6_logistic_top1}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)     & 79.81 & 79.91 & 80.36 & 81.18 & 84.43 \\
+    購入レース数   & 97{,}572 & 95{,}383 & 84{,}069 & 51{,}026 & 8{,}539 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{参考:単勝オッズ・人気を特徴量に含めたモデル}
+
+実験5の特徴量に加えて単勝オッズおよび人気を追加したモデルについても、
+同様の方法で複勝回収率を算出した。
+なお、これらのモデルは人気(市場予想)そのものを特徴量として利用しているため、
+モデルの予測が人気の情報を強く反映しやすい点に留意されたい。
+
+\paragraph{XGBoost}
+
+表~\ref{tab:exp6_xgb_odds_all}に全頭方式、表~\ref{tab:exp6_xgb_odds_top1}に1位方式の結果を示す。
+
+\begin{table}[H]
+  \centering
+  \caption{参考:XGBoost(オッズ・人気を含む)回収率(閾値\&全頭方式)}
+  \label{tab:exp6_xgb_odds_all}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)   & 82.07 & 82.58 & 83.70 & 85.64 & 88.61 \\
+    賭けた頭数   & 473{,}021 & 343{,}980 & 219{,}883 & 106{,}985 & 25{,}104 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{参考:XGBoost(オッズ・人気を含む)回収率(閾値\&1位方式)}
+  \label{tab:exp6_xgb_odds_top1}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)     & 84.15 & 84.15 & 84.21 & 85.31 & 88.66 \\
+    購入レース数   & 97{,}595 & 97{,}571 & 96{,}330 & 77{,}999 & 24{,}759 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Random Forest}
+
+表~\ref{tab:exp6_rf_odds_all}に全頭方式、表~\ref{tab:exp6_rf_odds_top1}に1位方式の結果を示す。
+
+\begin{table}[H]
+  \centering
+  \caption{参考:Random Forest(オッズ・人気を含む)回収率(閾値\&全頭方式)}
+  \label{tab:exp6_rf_odds_all}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)   & 82.33 & 83.66 & 85.19 & 86.90 & 90.18 \\
+    賭けた頭数   & 283{,}057 & 164{,}133 & 76{,}504 & 23{,}721 & 2{,}754 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{参考:Random Forest(オッズ・人気を含む)回収率(閾値\&1位方式)}
+  \label{tab:exp6_rf_odds_top1}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)     & 83.63 & 83.87 & 85.01 & 86.89 & 90.10 \\
+    購入レース数   & 97{,}403 & 90{,}379 & 60{,}840 & 22{,}644 & 2{,}752 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{ロジスティック回帰}
+
+表~\ref{tab:exp6_logistic_odds_all}に全頭方式、表~\ref{tab:exp6_logistic_odds_top1}に1位方式の結果を示す。
+
+\begin{table}[H]
+  \centering
+  \caption{参考:ロジスティック回帰(オッズ・人気を含む)回収率(閾値\&全頭方式)}
+  \label{tab:exp6_logistic_odds_all}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)   & 80.63 & 81.17 & 82.16 & 84.06 & 91.43 \\
+    賭けた頭数   & 528{,}115 & 393{,}795 & 244{,}212 & 74{,}233 & 91 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{参考:ロジスティック回帰(オッズ・人気を含む)回収率(閾値\&1位方式)}
+  \label{tab:exp6_logistic_odds_top1}
+  \begin{tabular}{lccccc}
+    \toprule
+    閾値 & 0.5 & 0.6 & 0.7 & 0.8 & 0.9 \\
+    \midrule
+    回収率(\%)     & 83.09 & 83.09 & 83.09 & 84.03 & 91.43 \\
+    購入レース数   & 97{,}595 & 97{,}595 & 97{,}559 & 66{,}058 & 91 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{実験7:パラメータ調整}
+各パラメータのスイープ結果を以下に示す。n\_estimatorsは検証を行っていないため結果は掲載しない。
+ 
+\subsection{木の深さ (max\_depth)}
+ 
+\begin{table}[H]
+\centering
+\caption{max\_depthスイープ結果}
+\begin{tabular}{cccccccc}
+\toprule
+値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
+\midrule
+4  & .7411 & .5469 & .8117 & .4417 & .7177 & 84.63 & 82.79 \\
+5  & .7439 & .5460 & .8100 & .4446 & .7073 & 84.65 & 83.07 \\
+6  & .7479 & .5442 & .8074 & .4487 & .6914 & 84.86 & 83.17 \\
+7  & .7538 & .5403 & .8033 & .4551 & .6645 & 84.95 & 83.17 \\
+8  & .7611 & .5355 & .7994 & .4642 & .6325 & 84.87 & 83.25 \\
+9  & .7700 & .5282 & .7952 & .4772 & .5915 & 84.97 & 83.25 \\
+10 & .7781 & .5192 & .7918 & .4914 & .5503 & 84.84 & 83.41 \\
+\bottomrule
+\end{tabular}
+\end{table}
+ 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{sweep_max_depth.png}
+\caption{分類指標・回収率 vs max\_depth (learning\_rate=0.1)}
+\label{fig:sweep_max_depth}
+\end{figure}
+ 
+\paragraph{考察}
+深さを増やすほどAUC(.812$\to$.792)・F1(.547$\to$.519)・Recall(.718$\to$.550)が単調に悪化する一方、回収率はdepth=6付近でほぼ頭打ちになり、6$\to$10まで増やしてもモデル1位回収率は+0.1pt未満、モデル上位3頭回収率でも+0.2pt程度しか伸びない。回収率がほとんど変わらないのに判別力とRecallだけ大きく犠牲になっており、depth=9・10は過学習方向に寄りすぎていると判断した。
+ 
+\paragraph{採用値} max\_depth = 7。回収率をほぼ落とさずに分類指標を保てる境界として採用した。
+ 
+\subsection{learning\_rate}
+ 
+ 
+\subsubsection{スイープ結果 (max\_depth=7、採用)}
+ 
+\begin{table}[H]
+\centering
+\caption{learning\_rateスイープ結果(max\_depth=7、採用)}
+\begin{tabular}{cccccccc}
+\toprule
+値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
+\midrule
+0.01 & .7413 & .5477 & .8127 & .4421 & .7197 & 84.19 & 82.53 \\
+0.03 & .7443 & .5469 & .8113 & .4451 & .7089 & 84.59 & 82.81 \\
+0.05 & .7477 & .5458 & .8094 & .4488 & .6964 & 84.75 & 82.91 \\
+0.07 & .7505 & .5440 & .8071 & .4518 & .6837 & 84.81 & 83.18 \\
+0.10 & .7538 & .5403 & .8033 & .4551 & .6645 & 84.95 & 83.17 \\
+\bottomrule
+\end{tabular}
+\end{table}
+ 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{sweep_learning_rate.png}
+\caption{分類指標・回収率 vs learning\_rate (max\_depth=7、採用)}
+\label{fig:sweep_lr_depth7}
+\end{figure}
+ 
+\paragraph{考察}
+depth=7ではrate=0.05のピークは再現されず、モデル1位回収率はrate=0.1に向けて単調に増加した。rate=0.07と0.1を比較すると、モデル1位回収率は0.1がわずかに上(+0.15pt)だが、モデル上位3頭回収率は0.07がわずかに上(実質同着)。AUC(.8071 vs .8033)・F1(.5440 vs .5403)・Recall(.6837 vs .6645、+1.9pt)はいずれも0.07が明確に上回る。0.1は回収率のわずかな上乗せと引き換えに分類指標を明確に犠牲にする選択であり、depthのときと同じ構図であるため0.07を採用した。
+ 
+\paragraph{採用値} learning\_rate = 0.07。
+ 
+\subsection{scale\_pos\_weight}
+ 
+\begin{table}[h]
+\centering
+\caption{scale\_pos\_weightスイープ結果}
+\begin{tabular}{cccccccc}
+\toprule
+値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
+\midrule
+auto (neg/pos) & .7505 & .5440 & .8071 & .4518 & .6837 & 84.81 & 83.18 \\
+1.5 & .8029 & .5038 & .8095 & .5575 & .4595 & 85.01 & 83.00 \\
+1.2 & .8084 & .4674 & .8098 & .5916 & .3863 & 84.73 & 83.01 \\
+1.0 & .8101 & .4308 & .8099 & .6199 & .3301 & 85.04 & 83.06 \\
+\bottomrule
+\end{tabular}
+\end{table}
+ 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{sweep_scale_pos_weight.png}
+\caption{分類指標・回収率 vs scale\_pos\_weight (max\_depth=7, learning\_rate=0.07)}
+\label{fig:sweep_spw}
+\end{figure}
+ 
+\paragraph{考察}
+AUCは.807〜.810とほぼ横並びでこの項目への感度が低い。一方でF1・Recallはautoから離れるほど急激に悪化し(Recallは.684$\to$.330と半減以下)、Precisionは逆に大きく上昇する(.45$\to$.62)。これはscale\_pos\_weightを下げるほどモデルが確信度の高い馬だけに予測を絞り込むためである。回収率で見てもautoは大きく劣らず、モデル上位3頭回収率はautoが最高(83.18\%)。モデル1位回収率は1.0がわずかに最高(85.04\%)だが1.2はautoより低い(84.73\%)という非単調な動きで、誤差の範囲とみられる。
+ 
+\paragraph{採用値} scale\_pos\_weight = auto (neg/pos)。固定値は回収率をほぼ変えずにRecallを大きく犠牲にするため、既定のautoを維持した。
+ 
+\subsection{L2正則化 (reg\_lambda)}
+ 
+\begin{table}[H]
+\centering
+\caption{reg\_lambdaスイープ結果}
+\begin{tabular}{cccccccc}
+\toprule
+値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
+\midrule
+0.0 & .7499 & .5427 & .8064 & .4508 & .6818 & 84.76 & 83.18 \\
+0.5 & .7503 & .5433 & .8068 & .4514 & .6823 & 84.73 & 83.17 \\
+1.0 & .7505 & .5440 & .8071 & .4518 & .6837 & 84.81 & 83.18 \\
+5.0 & .7501 & .5450 & .8081 & .4514 & .6876 & 84.73 & 83.07 \\
+\bottomrule
+\end{tabular}
+\end{table}
+ 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{sweep_reg_lambda.png}
+\caption{分類指標・回収率 vs reg\_lambda (max\_depth=7, learning\_rate=0.07, scale\_pos\_weight=auto)}
+\label{fig:sweep_reg_lambda}
+\end{figure}
+ 
+\paragraph{考察}
+AUC(.8064〜.8081)・F1(.5427〜.5450)・回収率(いずれも0.1pt程度の範囲)とも、0〜5の範囲でほぼ横ばいだった。以前の検証で「正則化はほとんど効果がない」とされていた所見と一致する結果となった。
+ 
+\paragraph{採用値} reg\_lambda = 1.0 (既定値)。差が誤差レベルであり、変更する積極的な理由がないため既定値を維持した。
+ 
+\subsection{L1正則化 (reg\_alpha)}
+ 
+\begin{table}[H]
+\centering
+\caption{reg\_alphaスイープ結果}
+\begin{tabular}{cccccccc}
+\toprule
+値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
+\midrule
+0.0 & .7505 & .5440 & .8071 & .4518 & .6837 & 84.81 & 83.18 \\
+0.5 & .7506 & .5437 & .8070 & .4518 & .6824 & 84.85 & 83.09 \\
+1.0 & .7509 & .5439 & .8071 & .4522 & .6824 & 84.76 & 83.13 \\
+5.0 & .7512 & .5448 & .8081 & .4527 & .6841 & 85.09 & 83.22 \\
+\bottomrule
+\end{tabular}
+\end{table}
+ 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{sweep_reg_alpha.png}
+\caption{分類指標・回収率 vs reg\_alpha (max\_depth=7, learning\_rate=0.07, scale\_pos\_weight=auto)}
+\label{fig:sweep_reg_alpha}
+\end{figure}
+ 
+\paragraph{考察}
+reg\_alpha=0の行はreg\_lambdaスイープ時の基準値(depth=7, rate=0.07, scale\_pos\_weight=auto, reg\_lambda=1)と完全に一致しており、条件の整合性を確認済み。AUC(.8070〜.8081)・F1(.5437〜.5448)・回収率(1位回収率で0.3pt程度、上位3頭回収率で0.13pt程度の範囲)とも、0〜5の範囲でほぼ横ばいであり、reg\_lambdaと同様にL1正則化の効果もほぼ見られなかった。reg\_alpha=5.0がAUC・F1・Recall・回収率のいずれもわずかに最良だが、差は誤差レベルである。
+ 
+\paragraph{採用値} reg\_alpha = 0 (既定値)。reg\_alpha=5.0がわずかに全指標で上回るが、差はごくわずかでありモデルを複雑にする積極的な理由がないため、既定値を維持した。
+ 
+\section{最終的な設定まとめ}
+ 
+\begin{table}[H]
+\centering
+\caption{最終的なXGBoostのハイパーパラメータ設定}
+\begin{tabular}{p{3cm}p{2.5cm}p{8.5cm}}
+\toprule
+パラメータ & 採用値 & 根拠(要約) \\
+\midrule
+n\_estimators & 1000 & デフォルトの100から増加。過学習リスクなしと判断し検証は省略。 \\
+\addlinespace
+max\_depth & 7 & 回収率はdepth=6以降ほぼ頭打ちなのに対し、AUC/F1/Recallは深くするほど悪化。回収率をほぼ落とさず分類指標を保てる境界として採用。 \\
+\addlinespace
+learning\_rate & 0.07 & depth=10で行った初回スイープではrate=0.05が回収率のピークだったが、depth=7で再スイープすると傾向が変化。0.1は1位回収率が最大だがAUC/F1/Recallを明確に犠牲にするため、回収率をほぼ落とさず分類指標を保てる0.07を採用。 \\
+\addlinespace
+scale\_pos\_weight & auto (neg/pos) & 固定値(1.5, 1.2, 1.0)はAUCにほぼ影響しないがF1・Recallを大きく悪化させ、上位3頭回収率も低下する。既定のauto(fold毎にneg/posを計算)を維持。 \\
+\addlinespace
+reg\_lambda (L2) & 1.0 (既定値) & 0〜5の範囲で全指標がほぼ横ばい。効果は無視できる水準のため既定値を維持。 \\
+\addlinespace
+reg\_alpha (L1) & 0 (既定値) & reg\_lambdaと同様、0〜5の範囲でほぼ横ばい(reg\_alpha=0の基準値はreg\_lambdaスイープ時と完全一致し条件の整合性を確認済み)。効果は無視できる水準のため既定値を維持。 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{考察}
+03:13 kai 第4回実験では、過去3走・5走の平均着順、複勝率、上りタイム、騎手複勝率、調教師複勝率などの過去情報を特徴量として追加した。その結果、第3回実験と比較して各モデルの性能が向上した。特にXGBoostではROC-AUCが0.6009から0.7449へ向上した。これは、競走馬の現在の状態だけでなく、過去の成績や得意条件などの傾向が複勝予測に有効であったためだと考えられる。
+
+第5回実験では、既存の特徴量を同一レース内で相対化した特徴量を追加した。その結果、XGBoostではROC-AUCが0.7449から0.7612へ向上した。競馬では、馬体重や過去成績などの絶対値だけではなく、同じレースに出走する馬との相対的な能力差も結果に影響すると考えられる。そのため、レース内での位置づけを表す特徴量が有効に働いたと考えられる。
+
+回収率評価では、予測確率の閾値を高く設定するほど回収率が向上する傾向が確認された。これは、予測確率が高い馬に限定することで、モデルが複勝と判断した馬の中でも、より確信度の高い馬を選択できたためだと考えられる。一方で、閾値を高くすると購入対象となる馬が減少するため、安定した収益を得るためには回収率だけでなく購入機会も考慮する必要がある。
+
+モデルごとに性能の傾向に違いが見られた。XGBoostはROC-AUCが高く、予測確率の順位付け性能に優れていた。一方で、回収率評価ではRandom Forestが最も高い結果となった。このことから、分類性能が高いモデルが必ずしも収益性の高いモデルになるとは限らず、実際の購入戦略を考慮した評価が重要である。
+
+パラメータ調整では大きな性能向上は確認できなかった。このことから、今回使用したデータではモデルのパラメータ調整よりも、入力する特徴量の設計が性能に大きな影響を与えたと考えられる。
+03:13 kai 考察です。チャッピーに書かせました
+03:15 kai 今回使用した特徴量は、過去成績や騎手・調教師の実績などを中心としており、展開予測や血統、馬場適性などの情報は考慮していない。そのため、これらの情報を追加することで、さらなる予測性能の向上が期待できる。また、今回は複勝を対象とした二値分類モデルを構築したが、購入金額の最適化や賭け方の戦略については検討していない。今後は、より多様な特徴量の追加や購入戦略の改善を行い、予測性能だけでなく実際の回収率向上を目指す必要がある。
+
+
+\section{意図していた実行計画との違い}
+当初の実験計画では、モデルの良し悪しをAccuracy・F1・ROC-AUC・Precision・Recallといった機械学習上の分類指標のみで評価し、特徴量を追加するごとにこれらの指標が向上することを目的としていた(第1〜5回実験)。しかし、実験5終了時点で分類指標を確認した際、例えばROC-AUCが0.75から0.76に上がった、F1が0.49であるといった数値だけでは、そのモデルが複勝予測として実用上「良い」のかどうかを判断することが難しいという問題に直面した。分類指標はあくまでモデルの統計的な性能を示すものであり、実際に馬券を購入した場合にどの程度の収益が見込めるかという、本来知りたい実用的な価値とは直接結びついていなかったためである。
+
+そこで、当初の計画にはなかった評価軸として、第6回実験より複勝回収率(実際に馬券を購入したと仮定した場合の払戻金÷購入金額)を新たに導入した。回収率は100%を基準に黒字・赤字が明確に判断できる指標であり、分類指標だけでは見えなかった「実運用でどの程度機能するか」という観点を補うものである。
+
+この変更により、分類指標では優れていたモデル(XGBoost)が、回収率では必ずしも最良ではない(場面によってはRandom Forestが同等以上の回収率を示す)という、分類指標だけを見ていては気づけなかった知見が得られた。結果として、以降のパラメータ調整(第7回実験)においても、分類指標と回収率の両方を確認しながらトレードオフを判断する方針に変更している。すなわち、当初は「予測精度(分類指標)の向上」を目的としていた実行計画が、実験を進める中で「予測精度と実用的な収益性(回収率)を両立させる」という目的へと修正された点が、当初の計画との主な違いである。
+
+\section{まとめ}
+本研究では、競走馬の複勝予測を目的として、過去成績や騎手・調教師情報などを利用した機械学習モデルを構築した。基本的な競走馬情報のみを用いたモデルから始め、特徴量を段階的に追加することで、どのような情報が予測性能に影響するかを検証した。
+
+実験の結果、過去の着順や複勝率、上りタイムなどの履歴情報を追加することで予測性能が向上し、競走馬の過去の傾向を利用することが複勝予測に有効であることが分かった。また、同一レース内で特徴量を相対化することで、出走馬間の比較情報をモデルに与えることができ、さらなる性能向上につながった。
+
+本研究を通して、機械学習ではモデルの選択やパラメータ調整だけでなく、対象データに適した特徴量を設計することが重要であることを学んだ。また、競馬のような複雑な予測問題では、予測精度だけでなく、実際の利用目的に合わせた評価方法を考える必要があることを理解した。
+
+\begin{thebibliography}{n}
+
+\bibitem{kaggle}
+Kaggle, JRA日本中央競馬会 Horse Racing Dataset,
+\url{https://www.kaggle.com/datasets/takamotoki/jra-horse-racing-dataset}, 参照日: 2026/07/28.
+\end{thebibliography}
+
+\end{document}

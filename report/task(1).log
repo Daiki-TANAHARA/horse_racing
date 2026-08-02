@@ -2,8 +2,8 @@ This is e-upTeX, Version 3.141592653-p4.1.2-u2.00-250202-2.6 (utf8.euc) (TeX Liv
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**/Users/kannahibiki/R8_First/InfoEX/keibaAI/horse_racing/report/task
-(/Users/kannahibiki/R8_First/InfoEX/keibaAI/horse_racing/report/task.tex
+**/Users/kannahibiki/R8_First/InfoEX/keibaAI/horse_racing/report/task(1)
+(/Users/kannahibiki/R8_First/InfoEX/keibaAI/horse_racing/report/task(1).tex
 pLaTeX2e <2023-02-14>+1, based on
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -189,8 +189,8 @@ File: l3backend-dvipdfmx.def 2024-05-08 L3 backend support: dvipdfmx
 \l__pdf_internal_box=\box76
 \g__pdf_backend_annotation_int=\count296
 \g__pdf_backend_link_int=\count297
-) (./task.aux)
-\openout1 = `task.aux'.
+) (./task(1).aux)
+\openout1 = `task(1).aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 12.
 LaTeX Font Info:    ... okay on input line 12.
@@ -238,7 +238,7 @@ LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
 (Font)              scaled to size 13.83836pt on input line 14.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 (Font)              scaled to size 13.83836pt on input line 14.
- (./task.toc
+ (./task(1).toc
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 6.72699pt on input line 2.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
@@ -247,7 +247,7 @@ LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 
 [1])
 \tf@toc=\write3
-\openout3 = `task.toc'.
+\openout3 = `task(1).toc'.
 
 
 
@@ -377,24 +377,20 @@ Overfull \hbox (27.4762pt too wide) in paragraph at lines 777--794
 
 [23]
 
-[24] (./task.aux)
+[24] (./task(1).aux)
  ***********
 pLaTeX2e <2023-02-14>+1, based on
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
  ) 
 Here is how much of TeX's memory you used:
  3533 strings out of 473836
- 52833 string characters out of 5731189
- 455960 words of memory out of 5000000
+ 52884 string characters out of 5731189
+ 455972 words of memory out of 5000000
  26771 multiletter control sequences out of 15000+600000
  572381 words of font info for 99 fonts, out of 8000000 for 9000
  934 hyphenation exceptions out of 8191
- 57i,11n,65p,683b,333s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,11n,65p,686b,333s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on task.dvi (25 pages, 66452 bytes).
+Output written on task(1).dvi (25 pages, 66452 bytes).
