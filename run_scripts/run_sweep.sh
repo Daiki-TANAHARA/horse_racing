@@ -8,7 +8,7 @@ set -e
 
 # どこから実行しても、このファイル自身がある場所(run_scripts/)を基準に
 # sweep_and_plot.pyがあるディレクトリ(new_evaluation/)に移動してから実行する
-cd "$(dirname "$0")/../new_evaluation"
+cd "$(dirname "$0")/../evaluation"
 
 # ── ステップ1: 木の本数 100 -> 1000 ──
 # XGBoost.py のデフォルトを既に1000に変更済みなので、このステップは実行不要です。

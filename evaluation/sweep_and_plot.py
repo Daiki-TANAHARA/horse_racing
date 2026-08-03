@@ -1,47 +1,3 @@
-"""
-XGBoostのハイパーパラメータを1項目ずつスイープして、
-「値を変えると分類指標・回収率がどう変化するか」をグラフにするスクリプトです。
-
-想定ディレクトリ構成:
-    horse_racing/
-        data/               features.csv, odds.csv など
-        learn_model/
-            XGBoost.py
-        evaluation/
-            calc_roi.py
-            evaluate_models.py
-            sweep_and_plot.py   ← このファイル
-        results/            (自動生成)
-        models/             (自動生成)
-
-パスはすべて「このファイルの場所」を基準に自動計算する(=learn_model/XGBoost.py も
-自動で見つける)ので、どのディレクトリから実行しても(cdしなくても)動きます。
-
-やっていること:
-    1. 候補値ごとに XGBoost.py をサブプロセスで実行 → 予測結果CSVを保存
-    2. evaluate_models.py の get_model_metrics() で分類指標・回収率を計算
-    3. 候補値 × 指標 の一覧表(CSV)と、折れ線グラフ(PNG)を保存
-
-使い方の例(第2項目: max_depthを4〜10で試す):
-    python sweep_and_plot.py --param max_depth --values 4,5,6,7,8,9,10
-
-第3項目(learning_rate)。すでに決めたmax_depth=6を固定しつつ試す場合:
-    python sweep_and_plot.py --param learning_rate --values 0.01,0.03,0.05,0.07,0.1 \
-        --fixed '{"max_depth": 6}'
-
-第4項目(scale_pos_weight)。"auto"はneg/posを毎foldで自動計算する元の設定:
-    python sweep_and_plot.py --param scale_pos_weight --values auto,1.5,1.2,1.0 \
-        --fixed '{"max_depth": 6, "learning_rate": 0.05}'
-
-第5項目(L2 = reg_lambda):
-    python sweep_and_plot.py --param reg_lambda --values 0,0.5,1,2,5 \
-        --fixed '{"max_depth": 6, "learning_rate": 0.05, "scale_pos_weight": 1.2}'
-
-第6項目(L1 = reg_alpha):
-    python sweep_and_plot.py --param reg_alpha --values 0,0.5,1,2,5 \
-        --fixed '{"max_depth": 6, "learning_rate": 0.05, "scale_pos_weight": 1.2, "reg_lambda": 1}'
-"""
-
 import argparse
 import json
 import os
@@ -93,7 +49,7 @@ def parse_args():
     parser.add_argument("--odds_path", type=str,
                          default=str(PROJECT_ROOT / "data" / "19860105-20210731_odds.csv"))
     parser.add_argument("--xgboost_script", type=str,
-                         default=str(PROJECT_ROOT / "learn_model" / "XGBoost.py"))
+                         default=str(PROJECT_ROOT / "learn_model" / "XGBoost_ex7.py"))
     parser.add_argument("--outdir", type=str,
                          default=str(PROJECT_ROOT / "results" / "sweep"))
     parser.add_argument("--python", type=str, default=sys.executable)

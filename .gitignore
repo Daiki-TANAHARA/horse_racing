@@ -11,12 +11,9 @@ data/*.csv
 
 # Results
 results/*.csv
+results/sweep/*.csv
 
 # Models
 models/*
 !models/.gitkeep
 
-Preprocess/feature_extraction.py
-Preprocess/test_preprocess.py
-
-data/observe.py
