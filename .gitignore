@@ -16,7 +16,3 @@ results/*.csv
 models/*
 !models/.gitkeep
 
-Preprocess/feature_extraction.py
-Preprocess/test_preprocess.py
-
-data/observe.py
