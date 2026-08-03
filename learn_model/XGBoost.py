@@ -169,7 +169,7 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
 
     model = XGBClassifier(
         objective="binary:logistic",
-        eval_metric="logloss",
+        scale_pos_weight=neg / pos,
         random_state=42,
         verbosity=0,
     )

@@ -162,6 +162,7 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     # 3. モデル定義・学習
     # ─────────────────────────────
     model = RandomForestClassifier(
+        class_weight="balanced",
         random_state=42,
         n_jobs=-1,
     )

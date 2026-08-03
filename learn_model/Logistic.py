@@ -166,7 +166,9 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
     model = Pipeline([
         ("scaler", StandardScaler()),
         ("clf", LogisticRegression(
+            class_weight="balanced",
             random_state=42,
+            max_iter=1000,
         )),
     ])
     model.fit(X_train, y_train)
