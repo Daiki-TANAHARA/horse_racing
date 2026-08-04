@@ -1,4 +1,4 @@
-This is e-upTeX, Version 3.141592653-p4.1.2-u2.00-250202-2.6 (utf8.euc) (TeX Live 2025) (preloaded format=platex 2025.4.9)  4 AUG 2026 10:15
+This is e-upTeX, Version 3.141592653-p4.1.2-u2.00-250202-2.6 (utf8.euc) (TeX Live 2025) (preloaded format=platex 2025.4.9)  4 AUG 2026 13:50
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -600,138 +600,132 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 [4]
 
 [5]
-Overfull \hbox (12.11874pt too wide) in paragraph at lines 140--140
- []\OT1/cmtt/m/n/10 uv run python learn_model/XGBoost.py --max_depth 7 --learni
-ng_rate 0.07[] 
- []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 153--154
+[6]
+Underfull \hbox (badness 10000) in paragraph at lines 171--172
 []$\OT1/cmtt/m/n/10 https : / / www . kaggle . com / datasets / takamotoki / jr
 a-[]horse-[]racing-[]dataset ? select =
  []
 
 
 
-[6]
-LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 202.
-LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 202.
-LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <9> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 203.
-LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 203.
-LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <9> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 203.
-LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 203.
-LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 6.72699pt on input line 238.
-
-
 [7]
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 228.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 228.
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <9> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 229.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 229.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <9> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 229.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 229.
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 6.72699pt on input line 264.
+
 
 [8]
 
 [9]
-Overfull \hbox (24.63074pt too wide) in paragraph at lines 310--324
+
+[10]
+Overfull \hbox (24.63074pt too wide) in paragraph at lines 336--350
  [][][][] 
  []
 
 
 
-[10]
-
 [11]
 
 [12]
-LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 4.805pt on input line 488.
-
 
 [13]
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 4.805pt on input line 514.
+
 
 [14]
 
 [15]
 
 [16]
+
+[17]
 File: sweep_max_depth.png Graphic file (type bmp)
 <sweep_max_depth.png>
 
 
-[17]
+[18]
+
+[19]
 File: sweep_learning_rate.png Graphic file (type bmp)
 <sweep_learning_rate.png>
 
-
-[18]
-Overfull \hbox (41.63474pt too wide) in paragraph at lines 771--781
+Overfull \hbox (41.63474pt too wide) in paragraph at lines 801--811
  [][][][] 
  []
 
 
-LaTeX Warning: `h' float specifier changed to `ht'.
 
+[20]
 File: sweep_scale_pos_weight.png Graphic file (type bmp)
 <sweep_scale_pos_weight.png>
 
 
-[19]
-
-[20]
+[21]
 File: sweep_reg_lambda.png Graphic file (type bmp)
 <sweep_reg_lambda.png>
 
 
-[21]
-
 [22]
+
+[23]
 File: sweep_reg_alpha.png Graphic file (type bmp)
 <sweep_reg_alpha.png>
 
-Underfull \hbox (badness 2088) in paragraph at lines 864--865
+Underfull \hbox (badness 2088) in paragraph at lines 894--895
 []\JY1/mc/m/n/10 回収率は \OT1/cmr/m/n/10 depth=6 \JY1/mc/m/n/10 以降ほぼ頭打ち
 なのに対し 、
  []
 
 
-Underfull \hbox (badness 4899) in paragraph at lines 872--873
+Underfull \hbox (badness 4899) in paragraph at lines 902--903
 []\OT1/cmr/m/n/10 reg[]lambda \JY1/mc/m/n/10 と同様 、 \OT1/cmr/m/n/10 0\JY1/mc
 /m/n/10 ～\OT1/cmr/m/n/10 5 \JY1/mc/m/n/10 の範囲でほぼ横ばい
  []
 
 
-Overfull \hbox (27.4762pt too wide) in paragraph at lines 858--875
+Overfull \hbox (27.4762pt too wide) in paragraph at lines 888--905
  [][][][] 
  []
 
 
-
-[23]
 
 [24]
 
 [25]
 
 [26]
-Underfull \hbox (badness 1194) in paragraph at lines 914--915
+
+[27]
+Underfull \hbox (badness 1194) in paragraph at lines 944--945
 []\OT1/cmr/m/n/10 Takamotoki, ``JRA Horse Rac-ing Dataset (JRA \JY1/mc/m/n/10 
 日本中央競馬会の競馬デ ータ\OT1/cmr/m/n/10 ),''
  []
 
 LaTeX Font Info:    Font shape `JT1/mc/m/it' in size <10> not available
-(Font)              Font shape `JT1/mc/m/n' tried instead on input line 917.
+(Font)              Font shape `JT1/mc/m/n' tried instead on input line 947.
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 917.
+(Font)              scaled to size 9.60999pt on input line 947.
 LaTeX Font Info:    Font shape `JY1/mc/m/it' in size <10> not available
-(Font)              Font shape `JY1/mc/m/n' tried instead on input line 917.
+(Font)              Font shape `JY1/mc/m/n' tried instead on input line 947.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 917.
+(Font)              scaled to size 9.60999pt on input line 947.
 
 
-[27] (./task.aux)
+[28] (./task.aux)
  ***********
 pLaTeX2e <2023-02-14>+1, based on
 LaTeX2e <2024-11-01> patch level 2
@@ -741,10 +735,10 @@ L3 programming layer <2025-01-18>
 Here is how much of TeX's memory you used:
  14480 strings out of 473836
  291170 string characters out of 5731190
- 672078 words of memory out of 5000000
+ 671107 words of memory out of 5000000
  37495 multiletter control sequences out of 15000+600000
  574154 words of font info for 106 fonts, out of 8000000 for 9000
  934 hyphenation exceptions out of 8191
  84i,11n,93p,1657b,878s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on task.dvi (28 pages, 93240 bytes).
+Output written on task.dvi (29 pages, 99600 bytes).

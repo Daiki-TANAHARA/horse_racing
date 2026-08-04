@@ -5,16 +5,16 @@
 想定ディレクトリ構成:
     horse_racing/
         data/               features.csv, odds.csv など
-        new_learn_model/
-            XGBoost.py      ← このファイル
-        new_evaluation/
+        learn_model/
+            XGBoost_ex7.py      ← このファイル
+        evaluation/
             calc_roi.py
             evaluate_models.py
             sweep_and_plot.py
         results/            (自動生成)
         models/             (自動生成)
 
-パスはすべて「このファイル(XGBoost.py)の場所」を基準に自動計算するので、
+パスはすべて「このファイル(XGBoost_ex7.py)の場所」を基準に自動計算するので、
 どのディレクトリから実行しても(cdしなくても)動きます。
 
 【変更点】
@@ -23,13 +23,13 @@
 (引数を何も指定しなければ、これまでと全く同じ設定で動く)
 
 例:
-    python XGBoost.py                              # デフォルト設定
-    python XGBoost.py --max_depth 6                # max_depthだけ変更
-    python XGBoost.py --max_depth 6 --learning_rate 0.05
-    python XGBoost.py --scale_pos_weight 1.5        # neg/pos の代わりに固定値
-    python XGBoost.py --scale_pos_weight auto       # neg/pos を毎foldで計算(デフォルト)
-    python XGBoost.py --reg_lambda 2 --reg_alpha 0.5
-    python XGBoost.py --output results/xgboost_test_results_depth6.csv
+    python XGBoost_ex7.py                              # デフォルト設定
+    python XGBoost_ex7.py --max_depth 6                # max_depthだけ変更
+    python XGBoost_ex7.py --max_depth 6 --learning_rate 0.05
+    python XGBoost_ex7.py --scale_pos_weight 1.5        # neg/pos の代わりに固定値
+    python XGBoost_ex7.py --scale_pos_weight auto       # neg/pos を毎foldで計算(デフォルト)
+    python XGBoost_ex7.py --reg_lambda 2 --reg_alpha 0.5
+    python XGBoost_ex7.py --output results/xgboost_test_results_depth6.csv
 """
 
 import argparse
@@ -56,7 +56,7 @@ except Exception:
     pass
 from xgboost import plot_importance
 
-# horse_racing/new_learn_model/XGBoost.py なので、1つ上がプロジェクトルート(horse_racing/)
+# horse_racing/new_learn_model/XGBoost_ex7.py なので、1つ上がプロジェクトルート(horse_racing/)
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 
@@ -310,7 +310,7 @@ def main():
     # 6. 集計
     # ─────────────────────────────
     results_df = pd.DataFrame(results).set_index("Fold")
-    print("\n=== XGBoost 平均スコア ===")
+    print("\n=== XGBoost_ex7 平均スコア ===")
     print(results_df.mean().to_string())
 
     # ─────────────────────────────
