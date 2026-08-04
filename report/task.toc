@@ -14,28 +14,27 @@
 \contentsline {subsection}{\numberline {2.11}モデル}{6}{}%
 \contentsline {subsection}{\numberline {2.12}パラメータ調整}{7}{}%
 \contentsline {subsubsection}{\numberline {2.12.1}方針}{7}{}%
-\contentsline {subsubsection}{\numberline {2.12.2}木の本数 (n\_estimators)}{7}{}%
-\contentsline {subsubsection}{\numberline {2.12.3}木の深さ (max\_depth)}{7}{}%
-\contentsline {subsubsection}{\numberline {2.12.4}learning\_rate}{7}{}%
-\contentsline {subsubsection}{\numberline {2.12.5}scale\_pos\_weight}{7}{}%
-\contentsline {subsubsection}{\numberline {2.12.6}L2正則化 (reg\_lambda)}{7}{}%
-\contentsline {subsubsection}{\numberline {2.12.7}L1正則化 (reg\_alpha)}{8}{}%
-\contentsline {subsubsection}{\numberline {2.12.8}全体の流れ}{8}{}%
+\contentsline {subsubsection}{\numberline {2.12.2}木の本数 (n\_estimators)}{9}{}%
+\contentsline {subsubsection}{\numberline {2.12.3}木の深さ (max\_depth)}{9}{}%
+\contentsline {subsubsection}{\numberline {2.12.4}learning\_rate}{9}{}%
+\contentsline {subsubsection}{\numberline {2.12.5}scale\_pos\_weight}{9}{}%
+\contentsline {subsubsection}{\numberline {2.12.6}L2正則化 (reg\_lambda)}{9}{}%
+\contentsline {subsubsection}{\numberline {2.12.7}L1正則化 (reg\_alpha)}{9}{}%
 \contentsline {section}{\numberline {3}使用した特徴量}{9}{}%
-\contentsline {section}{\numberline {4}実験結果}{10}{}%
-\contentsline {subsection}{\numberline {4.1}実験1:ベースライン}{10}{}%
-\contentsline {subsection}{\numberline {4.2}実験2:市場予想(単勝オッズ・人気)の追加}{11}{}%
-\contentsline {subsection}{\numberline {4.3}実験3:市場予想を除外した特徴量}{11}{}%
-\contentsline {subsection}{\numberline {4.4}実験4:過去成績特徴量の追加}{11}{}%
-\contentsline {subsection}{\numberline {4.5}実験5:同一レース内での相対化}{12}{}%
-\contentsline {subsection}{\numberline {4.6}実験6:回収率による評価}{12}{}%
-\contentsline {subsection}{\numberline {4.7}参考:単勝オッズ・人気を特徴量に含めたモデル}{14}{}%
-\contentsline {subsubsection}{\numberline {4.7.1}XGBoost}{14}{}%
-\contentsline {subsubsection}{\numberline {4.7.2}Random Forest}{14}{}%
-\contentsline {subsubsection}{\numberline {4.7.3}ロジスティック回帰}{15}{}%
-\contentsline {subsection}{\numberline {4.8}実験7:パラメータ調整}{15}{}%
+\contentsline {section}{\numberline {4}実験結果}{11}{}%
+\contentsline {subsection}{\numberline {4.1}実験1:ベースライン}{11}{}%
+\contentsline {subsection}{\numberline {4.2}実験2:市場予想(単勝オッズ・人気)の追加}{12}{}%
+\contentsline {subsection}{\numberline {4.3}実験3:市場予想を除外した特徴量}{12}{}%
+\contentsline {subsection}{\numberline {4.4}実験4:過去成績特徴量の追加}{12}{}%
+\contentsline {subsection}{\numberline {4.5}実験5:同一レース内での相対化}{13}{}%
+\contentsline {subsection}{\numberline {4.6}実験6:回収率による評価}{13}{}%
+\contentsline {subsection}{\numberline {4.7}参考:単勝オッズ・人気を特徴量に含めたモデル}{15}{}%
+\contentsline {subsubsection}{\numberline {4.7.1}XGBoost}{15}{}%
+\contentsline {subsubsection}{\numberline {4.7.2}Random Forest}{15}{}%
+\contentsline {subsubsection}{\numberline {4.7.3}ロジスティック回帰}{16}{}%
+\contentsline {subsection}{\numberline {4.8}実験7:パラメータ調整}{16}{}%
 \contentsline {subsubsection}{\numberline {4.8.1}木の深さ (max\_depth)}{16}{}%
-\contentsline {paragraph}{採用値}{17}{}%
+\contentsline {paragraph}{採用値}{18}{}%
 \contentsline {subsubsection}{\numberline {4.8.2}learning\_rate}{18}{}%
 \contentsline {paragraph}{採用値}{19}{}%
 \contentsline {subsection}{\numberline {4.9}scale\_pos\_weight}{19}{}%

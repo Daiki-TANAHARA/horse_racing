@@ -5,6 +5,8 @@
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
 
 \title{知能情報実験III（データマイニング班）\\競馬複勝予測}
 \author{グループの学籍番号列挙 245725D, 245304F, 245731J, 235751J}
@@ -180,6 +182,70 @@ uv run python evaluation/evaluate_models.py
 
 評価にあたっては、回収率の絶対的な最大値だけでなく、AUC・F1・Recallとのトレードオフを重視した。回収率がほぼ変わらないにもかかわらず分類指標(特にRecall)が大きく悪化する場合は、過学習のサインとみなし、より保守的な値を採用する方針とした。具体的な結果・考察・採用値は次の「実験結果」章にまとめる。
 
+図~\ref{fig:param_tuning_flow}に、座標降下的に進めた各フェーズの候補値と採用値の流れを示す。各フェーズの採用値は次フェーズのベースライン条件として固定され、順に木の本数$\to$木の深さ$\to$learning\_rate$\to$scale\_pos\_weight$\to$L2正則化$\to$L1正則化の順で調整を進めた。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  phase/.style={
+    draw, rounded corners, thick,
+    fill=blue!5,
+    text width=8.6cm,
+    align=left,
+    inner sep=8pt,
+    font=\small
+  },
+  arr/.style={-{Latex[length=2.5mm]}, thick},
+  lab/.style={font=\scriptsize, align=center, text width=3.4cm}
+]
+
+\node[phase] (p1) {
+  \textbf{Phase 1\ \ 木の本数 (n\_estimators)}\\[3pt]
+  試した値: 100 $\to$ 1000\\
+  採用値: \textbf{1000}
+};
+
+\node[phase, below=13mm of p1] (p2) {
+  \textbf{Phase 2\ \ 木の深さ (max\_depth)}\\[3pt]
+  試した値: 4, 5, 6, 7, 8, 9, 10\ (learning\_rate=0.1固定)\\
+  採用値: \textbf{7}
+};
+
+\node[phase, below=13mm of p2] (p3) {
+  \textbf{Phase 3\ \ learning\_rate}\\[3pt]
+  試した値: 0.01, 0.03, 0.05, 0.07, 0.1\ (max\_depth=7固定)\\
+  採用値: \textbf{0.07}
+};
+
+\node[phase, below=13mm of p3] (p4) {
+  \textbf{Phase 4\ \ scale\_pos\_weight}\\[3pt]
+  試した値: auto(neg/pos), 1.5, 1.2, 1.0\\
+  採用値: \textbf{auto (neg/pos)}
+};
+
+\node[phase, below=13mm of p4] (p5) {
+  \textbf{Phase 5\ \ L2正則化 (reg\_lambda)}\\[3pt]
+  試した値: 0, 0.5, 1, 5\\
+  採用値: \textbf{1.0（既定値）}
+};
+
+\node[phase, below=13mm of p5] (p6) {
+  \textbf{Phase 6\ \ L1正則化 (reg\_alpha)}\\[3pt]
+  試した値: 0, 0.5, 1, 5\\
+  採用値: \textbf{0（既定値）}
+};
+
+\draw[arr] (p1) -- (p2) node[lab, midway, right=1mm] {採用値をベース\\ラインに固定};
+\draw[arr] (p2) -- (p3) node[lab, midway, right=1mm] {採用値をベース\\ラインに固定};
+\draw[arr] (p3) -- (p4) node[lab, midway, right=1mm] {採用値をベース\\ラインに固定};
+\draw[arr] (p4) -- (p5) node[lab, midway, right=1mm] {採用値をベース\\ラインに固定};
+\draw[arr] (p5) -- (p6) node[lab, midway, right=1mm] {採用値をベース\\ラインに固定};
+
+\end{tikzpicture}
+\caption{パラメータ調整の手順(座標降下的アプローチ)。各フェーズのパラメータ名・試した値・採用値を示す。}
+\label{fig:param_tuning_flow}
+\end{figure}
+
 \subsubsection{木の本数 (n\_estimators)}
 
 100 $\to$ 1000に変更した。木の本数を増やすこと自体に悪影響はないと判断し、個別の検証・グラフ化は行わなかった。
@@ -203,17 +269,6 @@ uv run python evaluation/evaluate_models.py
 \subsubsection{L1正則化 (reg\_alpha)}
 
 候補として0, 0.5, 1, 5を設定し、max\_depth=7、learning\_rate=0.07、scale\_pos\_weight=autoで実施した。
-
-\subsubsection{全体の流れ}
-パラメーター調整の全体の流れを図~\ref{fig:parameters_transition}に示す。
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{parameters_transition.png}
-\caption{パラメータ調整の流れ}
-\label{fig:parameters_transition}
-\end{figure}
-
 
 
 \section{使用した特徴量}
@@ -642,9 +697,12 @@ uv run python evaluation/evaluate_models.py
 
 \subsubsection{木の深さ (max\_depth)}
 
+スイープ結果を表~\ref{tab:sweep_max_depth}に示す。
+
 \begin{table}[H]
 \centering
 \caption{max\_depthスイープ結果}
+\label{tab:sweep_max_depth}
 \begin{tabular}{cccccccc}
 \toprule
 値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
@@ -674,9 +732,12 @@ uv run python evaluation/evaluate_models.py
 
 \subsubsection*{スイープ結果 (max\_depth=7、採用)}
 
+スイープ結果を表~\ref{tab:sweep_lr_depth7}に示す。
+
 \begin{table}[H]
 \centering
 \caption{learning\_rateスイープ結果(max\_depth=7、採用)}
+\label{tab:sweep_lr_depth7}
 \begin{tabular}{cccccccc}
 \toprule
 値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
@@ -701,9 +762,12 @@ uv run python evaluation/evaluate_models.py
 
 \subsection{scale\_pos\_weight}
 
+スイープ結果を表~\ref{tab:sweep_spw}に示す。
+
 \begin{table}[h]
 \centering
 \caption{scale\_pos\_weightスイープ結果}
+\label{tab:sweep_spw}
 \begin{tabular}{cccccccc}
 \toprule
 値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
@@ -727,9 +791,12 @@ auto (neg/pos) & .7505 & .5440 & .8071 & .4518 & .6837 & 84.81 & 83.18 \\
 
 \subsection{L2正則化 (reg\_lambda)}
 
+スイープ結果を表~\ref{tab:sweep_reg_lambda}に示す。
+
 \begin{table}[H]
 \centering
 \caption{reg\_lambdaスイープ結果}
+\label{tab:sweep_reg_lambda}
 \begin{tabular}{cccccccc}
 \toprule
 値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
@@ -753,9 +820,12 @@ auto (neg/pos) & .7505 & .5440 & .8071 & .4518 & .6837 & 84.81 & 83.18 \\
 
 \subsection{L1正則化 (reg\_alpha)}
 
+スイープ結果を表~\ref{tab:sweep_reg_alpha}に示す。
+
 \begin{table}[H]
 \centering
 \caption{reg\_alphaスイープ結果}
+\label{tab:sweep_reg_alpha}
 \begin{tabular}{cccccccc}
 \toprule
 値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
@@ -779,9 +849,12 @@ auto (neg/pos) & .7505 & .5440 & .8071 & .4518 & .6837 & 84.81 & 83.18 \\
 
 \section{最終的な設定まとめ}
 
+最終的に採用したXGBoostのハイパーパラメータと、その採用根拠を表~\ref{tab:final_params}にまとめる。
+
 \begin{table}[H]
 \centering
 \caption{最終的なXGBoostのハイパーパラメータ設定}
+\label{tab:final_params}
 \begin{tabular}{p{3cm}p{2.5cm}p{8.5cm}}
 \toprule
 パラメータ & 採用値 & 根拠(要約) \\

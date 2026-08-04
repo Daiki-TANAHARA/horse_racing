@@ -18,97 +18,102 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.11}モデル}{6}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.12}パラメータ調整}{7}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.1}方針}{7}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.2}木の本数 (n\_estimators)}{7}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.3}木の深さ (max\_depth)}{7}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.4}learning\_rate}{7}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.5}scale\_pos\_weight}{7}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.6}L2正則化 (reg\_lambda)}{7}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.7}L1正則化 (reg\_alpha)}{8}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.8}全体の流れ}{8}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces パラメータ調整の流れ}}{8}{}\protected@file@percent }
-\newlabel{fig:parameters_transition}{{1}{8}{}{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces パラメータ調整の手順(座標降下的アプローチ)。各フェーズのパラメータ名・試した値・採用値を示す。}}{8}{}\protected@file@percent }
+\newlabel{fig:param_tuning_flow}{{1}{8}{}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.2}木の本数 (n\_estimators)}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.3}木の深さ (max\_depth)}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.4}learning\_rate}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.5}scale\_pos\_weight}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.6}L2正則化 (reg\_lambda)}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.12.7}L1正則化 (reg\_alpha)}{9}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3}使用した特徴量}{9}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces 基本特徴量}}{9}{}\protected@file@percent }
-\newlabel{tab:basic_features}{{1}{9}{}{table.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces レース条件に関する特徴量}}{9}{}\protected@file@percent }
-\newlabel{tab:race_condition_features}{{2}{9}{}{table.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces 過去成績に基づく特徴量}}{10}{}\protected@file@percent }
-\newlabel{tab:past_performance_features}{{3}{10}{}{table.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces 同一レース内での相対化特徴量}}{10}{}\protected@file@percent }
-\newlabel{tab:relative_features}{{4}{10}{}{table.4}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}実験結果}{10}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}実験1:ベースライン}{10}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces 実験1の結果}}{11}{}\protected@file@percent }
-\newlabel{tab:exp1}{{5}{11}{}{table.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}実験2:市場予想(単勝オッズ・人気)の追加}{11}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces 実験2の結果}}{11}{}\protected@file@percent }
-\newlabel{tab:exp2}{{6}{11}{}{table.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}実験3:市場予想を除外した特徴量}{11}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces 実験3の結果}}{11}{}\protected@file@percent }
-\newlabel{tab:exp3}{{7}{11}{}{table.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}実験4:過去成績特徴量の追加}{11}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces 実験4の結果}}{12}{}\protected@file@percent }
-\newlabel{tab:exp4}{{8}{12}{}{table.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}実験5:同一レース内での相対化}{12}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces 実験5の結果}}{12}{}\protected@file@percent }
-\newlabel{tab:exp5}{{9}{12}{}{table.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}実験6:回収率による評価}{12}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces 実験6:XGBoost 回収率(閾値\&全頭方式)}}{13}{}\protected@file@percent }
-\newlabel{tab:exp6_xgb_all}{{10}{13}{}{table.10}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces 実験6:XGBoost 回収率(閾値\&1位方式)}}{13}{}\protected@file@percent }
-\newlabel{tab:exp6_xgb_top1}{{11}{13}{}{table.11}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces 実験6:Random Forest 回収率(閾値\&全頭方式)}}{13}{}\protected@file@percent }
-\newlabel{tab:exp6_rf_all}{{12}{13}{}{table.12}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces 実験6:Random Forest 回収率(閾値\&1位方式)}}{13}{}\protected@file@percent }
-\newlabel{tab:exp6_rf_top1}{{13}{13}{}{table.13}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces 実験6:ロジスティック回帰 回収率(閾値\&全頭方式)}}{14}{}\protected@file@percent }
-\newlabel{tab:exp6_logistic_all}{{14}{14}{}{table.14}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces 実験6:ロジスティック回帰 回収率(閾値\&1位方式)}}{14}{}\protected@file@percent }
-\newlabel{tab:exp6_logistic_top1}{{15}{14}{}{table.15}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}参考:単勝オッズ・人気を特徴量に含めたモデル}{14}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.7.1}XGBoost}{14}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {16}{\ignorespaces 参考:XGBoost(オッズ・人気を含む)回収率(閾値\&全頭方式)}}{14}{}\protected@file@percent }
-\newlabel{tab:exp6_xgb_odds_all}{{16}{14}{}{table.16}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {17}{\ignorespaces 参考:XGBoost(オッズ・人気を含む)回収率(閾値\&1位方式)}}{14}{}\protected@file@percent }
-\newlabel{tab:exp6_xgb_odds_top1}{{17}{14}{}{table.17}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.7.2}Random Forest}{14}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {18}{\ignorespaces 参考:Random Forest(オッズ・人気を含む)回収率(閾値\&全頭方式)}}{15}{}\protected@file@percent }
-\newlabel{tab:exp6_rf_odds_all}{{18}{15}{}{table.18}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {19}{\ignorespaces 参考:Random Forest(オッズ・人気を含む)回収率(閾値\&1位方式)}}{15}{}\protected@file@percent }
-\newlabel{tab:exp6_rf_odds_top1}{{19}{15}{}{table.19}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.7.3}ロジスティック回帰}{15}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {20}{\ignorespaces 参考:ロジスティック回帰(オッズ・人気を含む)回収率(閾値\&全頭方式)}}{15}{}\protected@file@percent }
-\newlabel{tab:exp6_logistic_odds_all}{{20}{15}{}{table.20}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {21}{\ignorespaces 参考:ロジスティック回帰(オッズ・人気を含む)回収率(閾値\&1位方式)}}{15}{}\protected@file@percent }
-\newlabel{tab:exp6_logistic_odds_top1}{{21}{15}{}{table.21}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}実験7:パラメータ調整}{15}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces 基本特徴量}}{10}{}\protected@file@percent }
+\newlabel{tab:basic_features}{{1}{10}{}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces レース条件に関する特徴量}}{10}{}\protected@file@percent }
+\newlabel{tab:race_condition_features}{{2}{10}{}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces 過去成績に基づく特徴量}}{11}{}\protected@file@percent }
+\newlabel{tab:past_performance_features}{{3}{11}{}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces 同一レース内での相対化特徴量}}{11}{}\protected@file@percent }
+\newlabel{tab:relative_features}{{4}{11}{}{table.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}実験結果}{11}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}実験1:ベースライン}{11}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces 実験1の結果}}{12}{}\protected@file@percent }
+\newlabel{tab:exp1}{{5}{12}{}{table.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}実験2:市場予想(単勝オッズ・人気)の追加}{12}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces 実験2の結果}}{12}{}\protected@file@percent }
+\newlabel{tab:exp2}{{6}{12}{}{table.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}実験3:市場予想を除外した特徴量}{12}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces 実験3の結果}}{12}{}\protected@file@percent }
+\newlabel{tab:exp3}{{7}{12}{}{table.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}実験4:過去成績特徴量の追加}{12}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces 実験4の結果}}{13}{}\protected@file@percent }
+\newlabel{tab:exp4}{{8}{13}{}{table.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}実験5:同一レース内での相対化}{13}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces 実験5の結果}}{13}{}\protected@file@percent }
+\newlabel{tab:exp5}{{9}{13}{}{table.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}実験6:回収率による評価}{13}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces 実験6:XGBoost 回収率(閾値\&全頭方式)}}{14}{}\protected@file@percent }
+\newlabel{tab:exp6_xgb_all}{{10}{14}{}{table.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces 実験6:XGBoost 回収率(閾値\&1位方式)}}{14}{}\protected@file@percent }
+\newlabel{tab:exp6_xgb_top1}{{11}{14}{}{table.11}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces 実験6:Random Forest 回収率(閾値\&全頭方式)}}{14}{}\protected@file@percent }
+\newlabel{tab:exp6_rf_all}{{12}{14}{}{table.12}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces 実験6:Random Forest 回収率(閾値\&1位方式)}}{14}{}\protected@file@percent }
+\newlabel{tab:exp6_rf_top1}{{13}{14}{}{table.13}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces 実験6:ロジスティック回帰 回収率(閾値\&全頭方式)}}{15}{}\protected@file@percent }
+\newlabel{tab:exp6_logistic_all}{{14}{15}{}{table.14}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces 実験6:ロジスティック回帰 回収率(閾値\&1位方式)}}{15}{}\protected@file@percent }
+\newlabel{tab:exp6_logistic_top1}{{15}{15}{}{table.15}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}参考:単勝オッズ・人気を特徴量に含めたモデル}{15}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.7.1}XGBoost}{15}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {16}{\ignorespaces 参考:XGBoost(オッズ・人気を含む)回収率(閾値\&全頭方式)}}{15}{}\protected@file@percent }
+\newlabel{tab:exp6_xgb_odds_all}{{16}{15}{}{table.16}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {17}{\ignorespaces 参考:XGBoost(オッズ・人気を含む)回収率(閾値\&1位方式)}}{15}{}\protected@file@percent }
+\newlabel{tab:exp6_xgb_odds_top1}{{17}{15}{}{table.17}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.7.2}Random Forest}{15}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {18}{\ignorespaces 参考:Random Forest(オッズ・人気を含む)回収率(閾値\&全頭方式)}}{16}{}\protected@file@percent }
+\newlabel{tab:exp6_rf_odds_all}{{18}{16}{}{table.18}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {19}{\ignorespaces 参考:Random Forest(オッズ・人気を含む)回収率(閾値\&1位方式)}}{16}{}\protected@file@percent }
+\newlabel{tab:exp6_rf_odds_top1}{{19}{16}{}{table.19}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.7.3}ロジスティック回帰}{16}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {20}{\ignorespaces 参考:ロジスティック回帰(オッズ・人気を含む)回収率(閾値\&全頭方式)}}{16}{}\protected@file@percent }
+\newlabel{tab:exp6_logistic_odds_all}{{20}{16}{}{table.20}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {21}{\ignorespaces 参考:ロジスティック回帰(オッズ・人気を含む)回収率(閾値\&1位方式)}}{16}{}\protected@file@percent }
+\newlabel{tab:exp6_logistic_odds_top1}{{21}{16}{}{table.21}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}実験7:パラメータ調整}{16}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {4.8.1}木の深さ (max\_depth)}{16}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {22}{\ignorespaces max\_depthスイープ結果}}{16}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {22}{\ignorespaces max\_depthスイープ結果}}{17}{}\protected@file@percent }
+\newlabel{tab:sweep_max_depth}{{22}{17}{}{table.22}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces 分類指標・回収率 vs max\_depth (learning\_rate=0.1)}}{17}{}\protected@file@percent }
 \newlabel{fig:sweep_max_depth}{{2}{17}{}{figure.2}{}}
-\@writefile{toc}{\contentsline {paragraph}{採用値}{17}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{採用値}{18}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {4.8.2}learning\_rate}{18}{}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {23}{\ignorespaces learning\_rateスイープ結果(max\_depth=7、採用)}}{18}{}\protected@file@percent }
+\newlabel{tab:sweep_lr_depth7}{{23}{18}{}{table.23}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces 分類指標・回収率 vs learning\_rate (max\_depth=7、採用)}}{19}{}\protected@file@percent }
 \newlabel{fig:sweep_lr_depth7}{{3}{19}{}{figure.3}{}}
 \@writefile{toc}{\contentsline {paragraph}{採用値}{19}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.9}scale\_pos\_weight}{19}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {24}{\ignorespaces scale\_pos\_weightスイープ結果}}{19}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {24}{\ignorespaces scale\_pos\_weightスイープ結果}}{20}{}\protected@file@percent }
+\newlabel{tab:sweep_spw}{{24}{20}{}{table.24}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces 分類指標・回収率 vs scale\_pos\_weight (max\_depth=7, learning\_rate=0.07)}}{20}{}\protected@file@percent }
 \newlabel{fig:sweep_spw}{{4}{20}{}{figure.4}{}}
 \@writefile{toc}{\contentsline {paragraph}{採用値}{20}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.10}L2正則化 (reg\_lambda)}{21}{}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {25}{\ignorespaces reg\_lambdaスイープ結果}}{21}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces 分類指標・回収率 vs reg\_lambda (max\_depth=7, learning\_rate=0.07, scale\_pos\_weight=auto)}}{21}{}\protected@file@percent }
-\newlabel{fig:sweep_reg_lambda}{{5}{21}{}{figure.5}{}}
+\newlabel{tab:sweep_reg_lambda}{{25}{21}{}{table.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces 分類指標・回収率 vs reg\_lambda (max\_depth=7, learning\_rate=0.07, scale\_pos\_weight=auto)}}{22}{}\protected@file@percent }
+\newlabel{fig:sweep_reg_lambda}{{5}{22}{}{figure.5}{}}
 \@writefile{toc}{\contentsline {paragraph}{採用値}{22}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.11}L1正則化 (reg\_alpha)}{22}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {26}{\ignorespaces reg\_alphaスイープ結果}}{22}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {26}{\ignorespaces reg\_alphaスイープ結果}}{23}{}\protected@file@percent }
+\newlabel{tab:sweep_reg_alpha}{{26}{23}{}{table.26}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces 分類指標・回収率 vs reg\_alpha (max\_depth=7, learning\_rate=0.07, scale\_pos\_weight=auto)}}{23}{}\protected@file@percent }
 \newlabel{fig:sweep_reg_alpha}{{6}{23}{}{figure.6}{}}
 \@writefile{toc}{\contentsline {paragraph}{採用値}{23}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {5}最終的な設定まとめ}{24}{}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {27}{\ignorespaces 最終的なXGBoostのハイパーパラメータ設定}}{24}{}\protected@file@percent }
+\newlabel{tab:final_params}{{27}{24}{}{table.27}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {6}考察}{24}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {7}意図していた実行計画との違い}{26}{}\protected@file@percent }
 \bibcite{kaggle}{1}
