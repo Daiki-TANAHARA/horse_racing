@@ -120,30 +120,44 @@ uv sync
         \item \texttt{19860105-20210731\_odds.csv}
     \end{itemize}
 
-    \item 再現したい実験に対応するコミットへ移動する。
-
+    \item 特徴量作成(最初に1回だけ実行)
 \begin{verbatim}
-git checkout <コミットID>
+./run_scripts/build_features.sh
 \end{verbatim}
 
-    \item コミットに対応した実験を実行する。
-
-    \begin{itemize}
-        \item 最終コミット版
-
+    \item 各実験は \texttt{run\_scripts/} 以下のシェルスクリプトにより、3モデル(XGBoost, Random Forest, ロジスティック回帰)をまとめて実行できる。\\
+実験1
 \begin{verbatim}
-uv run python Preprocess/make_features.py
-uv run python learn_model/XGBoost.py --max_depth 7 --learning_rate 0.07
-uv run python evaluation/evaluate_models.py
+./run_scripts/ex1.sh
 \end{verbatim}
-
-        \item 最終一歩手前のコミット版
-
+実験2
 \begin{verbatim}
-./run_all.sh
+./run_scripts/ex2.sh
 \end{verbatim}
-
-    \end{itemize}
+実験3
+\begin{verbatim}
+./run_scripts/ex3.sh
+\end{verbatim}
+実験4
+\begin{verbatim}
+./run_scripts/ex4.sh
+\end{verbatim}
+実験5
+\begin{verbatim}
+./run_scripts/ex5.sh
+\end{verbatim}
+実験6\\
+ex6\_1.shは実験5と同じ特徴量で回収率を計算する。\\
+ex6\_2.shは参考実験として実験5 + 単勝オッズ・人気で回収率を計算する。
+\begin{verbatim}
+./run_scripts/ex6_1.sh
+./run_scripts/ex6_2.sh
+\end{verbatim}
+実験7\\
+ハイパーパラメータ探索を実行する。
+\begin{verbatim}
+./run_scripts/ex7.sh
+\end{verbatim}
 
 \end{enumerate}
 

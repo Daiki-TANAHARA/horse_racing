@@ -1,7 +1,7 @@
 #!/bin/bash
 # XGBoostパラメータ調整を1項目ずつ実行するスクリプト。
-# 置き場所: horse_racing/run_scripts/run_sweep.sh
-# (実行対象の sweep_and_plot.py は horse_racing/new_evaluation/ にあります)
+# 置き場所: horse_racing/run_scripts/ex7.sh
+# (実行対象の sweep_and_plot.py は horse_racing/evaluation/ にあります)
 # 各ステップを終えるごとに、最善値を確認して次のステップの --fixed に反映してください。
 # (グラフとCSVは horse_racing/results/sweep/ に保存されます)
 set -e
