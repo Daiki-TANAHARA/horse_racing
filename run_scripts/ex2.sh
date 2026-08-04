@@ -1,9 +1,9 @@
 #!/bin/bash
-# 実験6:実験5と同様の特徴量を使用し、回収率を計算する
+# 実験2:実験1 + 単勝オッズ・人気を3モデルで実行する
 
 set -e
 
-EXPERIMENT="exp5"
+EXPERIMENT="exp2"
 
 echo "===== ${EXPERIMENT}: XGBoost ====="
 uv run python learn_model/XGBoost.py --experiment "${EXPERIMENT}"

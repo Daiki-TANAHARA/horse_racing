@@ -1,9 +1,9 @@
 #!/bin/bash
-# 実験6:実験5と同様の特徴量を使用し、回収率を計算する
+# 実験3:市場予想を除外し、レース条件特徴量を追加して3モデルで実行する
 
 set -e
 
-EXPERIMENT="exp5"
+EXPERIMENT="exp3"
 
 echo "===== ${EXPERIMENT}: XGBoost ====="
 uv run python learn_model/XGBoost.py --experiment "${EXPERIMENT}"
