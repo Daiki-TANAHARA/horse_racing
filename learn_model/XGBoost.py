@@ -3,6 +3,10 @@
 評価指標: F1スコア, ROC-AUC, Precision, Recall, Accuracy
 """
 
+import argparse
+import sys
+import os
+
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import TimeSeriesSplit
@@ -18,117 +22,30 @@ import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Hiragino Sans"
 from xgboost import plot_importance
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "config"))
+from feature_sets import EXPERIMENTS
+
+# ─────────────────────────────
+# 0. コマンドライン引数
+# ─────────────────────────────
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--experiment",
+    required=True,
+    choices=EXPERIMENTS.keys(),
+    help="使用する特徴量セットの実験名(config/feature_sets.py参照)",
+)
+args = parser.parse_args()
 
 # ─────────────────────────────
 # 1. データ読込
 # ─────────────────────────────
-# df = pd.read_csv("preprocessed_race_result.csv", low_memory=False)
 df = pd.read_csv("data/features.csv", low_memory=False)
 df["レース日付"] = pd.to_datetime(df["レース日付"])
 df = df.sort_values("レース日付")
 
-features = [
-    "距離(m)",
-    "馬齢",
-    "馬体重",
-    "斤量",
-    "馬体重増減",
-    "枠番",
-    # "人気",
-    # "単勝",
-    "過去3走複勝率",
-    "過去5走複勝率",
-    "前走着順",
-    "過去3走平均着順",
-    "過去5走平均着順",
-    "前走上り",
-    "過去3走平均上り",
-    "過去5走平均上り",
-    "騎手複勝率",
-    "調教師複勝率",
-    "休養日数",
-    "芝・ダート別複勝率",
-    "競馬場別複勝率",
-    "距離帯別複勝率",
-    "過去3走平均着順順位率",
-    "過去5走平均着順順位率",
-    "過去3走平均上り順位率",
-    "過去5走平均上り順位率",
-    "過去3走複勝率順位率",
-    "過去5走複勝率順位率",
-    "騎手複勝率順位率",
-    "調教師複勝率順位率",
-    "芝・ダート別複勝率順位率",
-    "距離帯別複勝率順位率",
-    "競馬場別複勝率順位率",
-    "過去3走平均着順標準化",
-    "過去5走平均着順標準化",
-    "過去3走平均上り標準化",
-    "過去5走平均上り標準化",
-    "過去3走複勝率標準化",
-    "過去5走複勝率標準化",
-    "騎手複勝率標準化",
-    "調教師複勝率標準化",
-    "芝・ダート別複勝率標準化",
-    "距離帯別複勝率標準化",
-    "競馬場別複勝率標準化",
-    "斤量順位率",
-    "馬齢順位率",
-    "馬体重順位率",
-    "馬体重増減順位率",
-    "休養日数順位率",
-    "斤量標準化",
-    "馬齢標準化",
-    "馬体重標準化",
-    "馬体重増減標準化",
-    "休養日数標準化",
-    "芝・ダート区分_ダート",
-    "芝・ダート区分_芝",
-    "性別_セ",
-    "性別_牝",
-    "性別_牡",
-    "競馬場名_中京",
-    "競馬場名_中山",
-    "競馬場名_京都",
-    "競馬場名_函館",
-    "競馬場名_小倉",
-    "競馬場名_新潟",
-    "競馬場名_札幌",
-    "競馬場名_東京",
-    "競馬場名_福島",
-    "競馬場名_阪神",
-    "馬場状態1_不良",
-    "馬場状態1_稍重",
-    "馬場状態1_良",
-    "馬場状態1_重",
-    "右左回り・直線区分_右",
-    "右左回り・直線区分_左",
-    "右左回り・直線区分_直線",
-    "天候_小雨",
-    "天候_小雪",
-    "天候_晴",
-    "天候_曇",
-    "天候_雨",
-    "天候_雪",
-    "距離帯_マイル",
-    "距離帯_中距離",
-    "距離帯_中長距離",
-    "距離帯_短距離",
-    "距離帯_長距離",
-    "レースクラス_1勝クラス",
-    "レースクラス_2勝クラス",
-    "レースクラス_3勝クラス",
-    "レースクラス_オープン",
-    "レースクラス_新馬",
-    "レースクラス_未勝利",
-    "レースグレード_G",
-    "レースグレード_G1",
-    "レースグレード_G2",
-    "レースグレード_G3",
-    "レースグレード_L",
-    "レースグレード_なし",
-]
-target   = "複勝"
+features = EXPERIMENTS[args.experiment]
+target = "複勝"
 
 # ─────────────────────────────
 # 2. 時系列クロスバリデーション
@@ -157,7 +74,7 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
         f"Test  : {test_df['レース日付'].min().date()} ～ "
         f"{test_df['レース日付'].max().date()}"
     )
-    
+
     X_train, y_train = train_df[features], train_df[target]
     X_test,  y_test  = test_df[features],  test_df[target]
 
@@ -169,13 +86,13 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
 
     model = XGBClassifier(
         objective="binary:logistic",
-        eval_metric="logloss",
+        scale_pos_weight=neg / pos,
         random_state=42,
         verbosity=0,
     )
     model.fit(X_train, y_train)
 
-    model.save_model(f"models/xgboost_fold{fold}.json")
+    model.save_model(f"models/xgboost_{args.experiment}_fold{fold}.json")
 
     # ─────────────────────────────
     # 4. 評価
@@ -205,17 +122,27 @@ for fold, (train_idx, test_idx) in enumerate(tscv.split(race_ids), 1):
           f"Rec={results[-1]['Recall']:.4f}")
 
 # ─────────────────────────────
-# 5. 予測結果の保存 ← 追加
+# 5. 予測結果の保存
 # ─────────────────────────────
 all_test_results = pd.concat(all_test_results, ignore_index=True)
-all_test_results.to_csv("results/xgboost_test_results.csv", index=False)
-print("results/xgboost_test_results.csv を保存しました。")
+
+# 実験ごとの結果保存
+experiment_result_path = (f"results/xgboost_{args.experiment}_test_results.csv")
+all_test_results.to_csv(experiment_result_path,index=False)
+print(f"{experiment_result_path} を保存しました。")
+
+
+# evaluate_models.py 用の固定ファイル保存
+# 常に最新実験結果で上書きする
+latest_result_path = "results/xgboost_test_results.csv"
+all_test_results.to_csv(latest_result_path,index=False)
+print(f"{latest_result_path} を更新しました。")
 
 # ─────────────────────────────
 # 6. 集計
 # ─────────────────────────────
 results_df = pd.DataFrame(results).set_index("Fold")
-print("\n=== XGBoost 平均スコア ===")
+print(f"\n=== XGBoost({args.experiment}) 平均スコア ===")
 print(results_df.mean().to_string())
 
 # ─────────────────────────────
@@ -226,4 +153,3 @@ importance = pd.Series(
 ).sort_values(ascending=False)
 print("\n=== 特徴量重要度 ===")
 print(importance.to_string())
-

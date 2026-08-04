@@ -1,9 +1,9 @@
 #!/bin/bash
-# 実験6:実験5と同様の特徴量を使用し、回収率を計算する
+# 実験1:ベースライン(馬齢・馬体重・距離・芝ダート区分のみ)を3モデルで実行する
 
-set -e
+set -e  # いずれかのコマンドが失敗したら即座に停止する
 
-EXPERIMENT="exp5"
+EXPERIMENT="exp1"
 
 echo "===== ${EXPERIMENT}: XGBoost ====="
 uv run python learn_model/XGBoost.py --experiment "${EXPERIMENT}"
