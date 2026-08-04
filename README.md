@@ -16,11 +16,13 @@
 horse_racing/
 ├── data/               # データセット
 ├── config/             # 実験ごとの設定ファイル
+├── Preprocess/         # 特徴量作成プログラム
 ├── learn_model/        # 学習プログラム
 ├── evaluation/         # 評価プログラム
 ├── run_scripts/        # 実験実行用シェルスクリプト
 ├── models/             # 学習済みモデル（自動生成）
-└── results/            # 実験結果（自動生成）
+├── results/            # 実験結果（自動生成）
+└── report/             # 最終報告書
 ```
 
 ## セットアップ
