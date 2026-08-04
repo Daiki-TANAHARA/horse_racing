@@ -5,6 +5,8 @@
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
 
 \title{知能情報実験III（データマイニング班）\\競馬複勝予測}
 \author{グループの学籍番号列挙 245725D, 245304F, 245731J, 235751J}
@@ -180,6 +182,70 @@ uv run python evaluation/evaluate_models.py
 
 評価にあたっては、回収率の絶対的な最大値だけでなく、AUC・F1・Recallとのトレードオフを重視した。回収率がほぼ変わらないにもかかわらず分類指標(特にRecall)が大きく悪化する場合は、過学習のサインとみなし、より保守的な値を採用する方針とした。具体的な結果・考察・採用値は次の「実験結果」章にまとめる。
 
+図~\ref{fig:param_tuning_flow}に、座標降下的に進めた各フェーズの候補値と採用値の流れを示す。各フェーズの採用値は次フェーズのベースライン条件として固定され、順に木の本数$\to$木の深さ$\to$learning\_rate$\to$scale\_pos\_weight$\to$L2正則化$\to$L1正則化の順で調整を進めた。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  phase/.style={
+    draw, rounded corners, thick,
+    fill=blue!5,
+    text width=8.6cm,
+    align=left,
+    inner sep=8pt,
+    font=\small
+  },
+  arr/.style={-{Latex[length=2.5mm]}, thick},
+  lab/.style={font=\scriptsize, align=center, text width=3.4cm}
+]
+
+\node[phase] (p1) {
+  \textbf{Phase 1\ \ 木の本数 (n\_estimators)}\\[3pt]
+  試した値: 100 $\to$ 1000\\
+  採用値: \textbf{1000}
+};
+
+\node[phase, below=13mm of p1] (p2) {
+  \textbf{Phase 2\ \ 木の深さ (max\_depth)}\\[3pt]
+  試した値: 4, 5, 6, 7, 8, 9, 10\ (learning\_rate=0.1固定)\\
+  採用値: \textbf{7}
+};
+
+\node[phase, below=13mm of p2] (p3) {
+  \textbf{Phase 3\ \ learning\_rate}\\[3pt]
+  試した値: 0.01, 0.03, 0.05, 0.07, 0.1\ (max\_depth=7固定)\\
+  採用値: \textbf{0.07}
+};
+
+\node[phase, below=13mm of p3] (p4) {
+  \textbf{Phase 4\ \ scale\_pos\_weight}\\[3pt]
+  試した値: auto(neg/pos), 1.5, 1.2, 1.0\\
+  採用値: \textbf{auto (neg/pos)}
+};
+
+\node[phase, below=13mm of p4] (p5) {
+  \textbf{Phase 5\ \ L2正則化 (reg\_lambda)}\\[3pt]
+  試した値: 0, 0.5, 1, 5\\
+  採用値: \textbf{1.0（既定値）}
+};
+
+\node[phase, below=13mm of p5] (p6) {
+  \textbf{Phase 6\ \ L1正則化 (reg\_alpha)}\\[3pt]
+  試した値: 0, 0.5, 1, 5\\
+  採用値: \textbf{0（既定値）}
+};
+
+\draw[arr] (p1) -- (p2) node[lab, midway, right=1mm] {採用値をベース\\ラインに固定};
+\draw[arr] (p2) -- (p3) node[lab, midway, right=1mm] {採用値をベース\\ラインに固定};
+\draw[arr] (p3) -- (p4) node[lab, midway, right=1mm] {採用値をベース\\ラインに固定};
+\draw[arr] (p4) -- (p5) node[lab, midway, right=1mm] {採用値をベース\\ラインに固定};
+\draw[arr] (p5) -- (p6) node[lab, midway, right=1mm] {採用値をベース\\ラインに固定};
+
+\end{tikzpicture}
+\caption{パラメータ調整の手順(座標降下的アプローチ)。各フェーズのパラメータ名・試した値・採用値を示す。}
+\label{fig:param_tuning_flow}
+\end{figure}
+
 \subsubsection{木の本数 (n\_estimators)}
 
 100 $\to$ 1000に変更した。木の本数を増やすこと自体に悪影響はないと判断し、個別の検証・グラフ化は行わなかった。
@@ -205,8 +271,7 @@ uv run python evaluation/evaluate_models.py
 候補として0, 0.5, 1, 5を設定し、max\_depth=7、learning\_rate=0.07、scale\_pos\_weight=autoで実施した。
 
 
-\section{実験}
-\subsection{使用した特徴量}
+\section{使用した特徴量}
 本研究で使用した特徴量は、数値型についてはそのまま入力し、
 カテゴリ型についてはカテゴリ数に応じて変換を行った。
 具体的には、カテゴリ数が20以下の特徴量はOne-Hotエンコーディングにより
@@ -296,9 +361,9 @@ uv run python evaluation/evaluate_models.py
 \end{table}
 表~\ref{tab:past_performance_features}の過去成績特徴量および馬体重・斤量・馬齢・休養日数について、
 同一レースに出走する馬同士で比較した相対値を追加で作成した。
-\subsection{実験結果}
+\section{実験結果}
 
-\subsubsection{実験1:ベースライン}
+\subsection{実験1:ベースライン}
 
 使用した特徴量:馬齢, 馬体重, 距離(m), 芝・ダート区分\\
 結果を表~\ref{tab:exp1}に示す。
@@ -318,7 +383,7 @@ uv run python evaluation/evaluate_models.py
   \end{tabular}
 \end{table}
 
-\subsubsection{実験2:市場予想(単勝オッズ・人気)の追加}
+\subsection{実験2:市場予想(単勝オッズ・人気)の追加}
 
 実験1の特徴量に加え、単勝オッズ・人気を追加した。\\
 結果を表~\ref{tab:exp2}に示す。
@@ -338,7 +403,7 @@ uv run python evaluation/evaluate_models.py
   \end{tabular}
 \end{table}
 
-\subsubsection{実験3:市場予想を除外した特徴量}
+\subsection{実験3:市場予想を除外した特徴量}
 
 単勝オッズ・人気を除外し、代わりに斤量, 馬体重増減, 枠番, 休養日数, 性別,
 競馬場名, 馬場状態, 天候, 右左回り・直線区分, 距離帯, レースクラス, レースグレード
@@ -360,7 +425,7 @@ uv run python evaluation/evaluate_models.py
   \end{tabular}
 \end{table}
 
-\subsubsection{実験4:過去成績特徴量の追加}
+\subsection{実験4:過去成績特徴量の追加}
 
 実験3の特徴量に加え、過去平均着順, 過去複勝率, 調教師複勝率, 騎手複勝率,
 距離帯別複勝率, 過去平均上り, 芝・ダート別複勝率, 競馬場別複勝率を追加した。\\
@@ -381,7 +446,7 @@ uv run python evaluation/evaluate_models.py
   \end{tabular}
 \end{table}
 
-\subsubsection{実験5:同一レース内での相対化}
+\subsection{実験5:同一レース内での相対化}
 
 過去成績や馬体重などの特徴量について、同一レース内での順位率・標準化を追加した。\\
 結果を表~\ref{tab:exp5}に示す。
@@ -401,7 +466,7 @@ uv run python evaluation/evaluate_models.py
   \end{tabular}
 \end{table}
 
-\subsubsection{実験6:回収率による評価}
+\subsection{実験6:回収率による評価}
 
 実験5のモデルを用いて、閾値方式による複勝回収率を評価した。
 モデルの予測確率が一定の閾値を超えた場合にのみ
@@ -524,14 +589,14 @@ uv run python evaluation/evaluate_models.py
   \end{tabular}
 \end{table}
 
-\subsubsection{参考:単勝オッズ・人気を特徴量に含めたモデル}
+\subsection{参考:単勝オッズ・人気を特徴量に含めたモデル}
 
 実験5の特徴量に加えて単勝オッズおよび人気を追加したモデルについても、
 同様の方法で複勝回収率を算出した。
 なお、これらのモデルは人気(市場予想)そのものを特徴量として利用しているため、
 モデルの予測が人気の情報を強く反映しやすい点に留意されたい。
 
-\paragraph{XGBoost}
+\subsubsection{XGBoost}
 
 表~\ref{tab:exp6_xgb_odds_all}に全頭方式、表~\ref{tab:exp6_xgb_odds_top1}に1位方式の結果を示す。
 
@@ -563,7 +628,7 @@ uv run python evaluation/evaluate_models.py
   \end{tabular}
 \end{table}
 
-\paragraph{Random Forest}
+\subsubsection{Random Forest}
 
 表~\ref{tab:exp6_rf_odds_all}に全頭方式、表~\ref{tab:exp6_rf_odds_top1}に1位方式の結果を示す。
 
@@ -595,7 +660,7 @@ uv run python evaluation/evaluate_models.py
   \end{tabular}
 \end{table}
 
-\paragraph{ロジスティック回帰}
+\subsubsection{ロジスティック回帰}
 
 表~\ref{tab:exp6_logistic_odds_all}に全頭方式、表~\ref{tab:exp6_logistic_odds_top1}に1位方式の結果を示す。
 
@@ -627,14 +692,17 @@ uv run python evaluation/evaluate_models.py
   \end{tabular}
 \end{table}
 
-\subsubsection{実験7:パラメータ調整}
+\subsection{実験7:パラメータ調整}
 各パラメータのスイープ結果を以下に示す。n\_estimatorsは検証を行っていないため結果は掲載しない。
 
-\subsection{木の深さ (max\_depth)}
+\subsubsection{木の深さ (max\_depth)}
+
+スイープ結果を表~\ref{tab:sweep_max_depth}に示す。
 
 \begin{table}[H]
 \centering
 \caption{max\_depthスイープ結果}
+\label{tab:sweep_max_depth}
 \begin{tabular}{cccccccc}
 \toprule
 値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
@@ -659,14 +727,17 @@ uv run python evaluation/evaluate_models.py
 
 \paragraph{採用値} max\_depth = 7。回収率をほぼ落とさずに分類指標を保てる境界として採用した。
 
-\subsection{learning\_rate}
+\subsubsection{learning\_rate}
 
 
-\subsubsection{スイープ結果 (max\_depth=7、採用)}
+\subsubsection*{スイープ結果 (max\_depth=7、採用)}
+
+スイープ結果を表~\ref{tab:sweep_lr_depth7}に示す。
 
 \begin{table}[H]
 \centering
 \caption{learning\_rateスイープ結果(max\_depth=7、採用)}
+\label{tab:sweep_lr_depth7}
 \begin{tabular}{cccccccc}
 \toprule
 値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
@@ -691,9 +762,12 @@ uv run python evaluation/evaluate_models.py
 
 \subsection{scale\_pos\_weight}
 
+スイープ結果を表~\ref{tab:sweep_spw}に示す。
+
 \begin{table}[h]
 \centering
 \caption{scale\_pos\_weightスイープ結果}
+\label{tab:sweep_spw}
 \begin{tabular}{cccccccc}
 \toprule
 値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
@@ -717,9 +791,12 @@ auto (neg/pos) & .7505 & .5440 & .8071 & .4518 & .6837 & 84.81 & 83.18 \\
 
 \subsection{L2正則化 (reg\_lambda)}
 
+スイープ結果を表~\ref{tab:sweep_reg_lambda}に示す。
+
 \begin{table}[H]
 \centering
 \caption{reg\_lambdaスイープ結果}
+\label{tab:sweep_reg_lambda}
 \begin{tabular}{cccccccc}
 \toprule
 値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
@@ -743,9 +820,12 @@ auto (neg/pos) & .7505 & .5440 & .8071 & .4518 & .6837 & 84.81 & 83.18 \\
 
 \subsection{L1正則化 (reg\_alpha)}
 
+スイープ結果を表~\ref{tab:sweep_reg_alpha}に示す。
+
 \begin{table}[H]
 \centering
 \caption{reg\_alphaスイープ結果}
+\label{tab:sweep_reg_alpha}
 \begin{tabular}{cccccccc}
 \toprule
 値 & Accuracy & F1 & ROC-AUC & Precision & Recall & 1位回収率 & 上位3頭回収率 \\
@@ -769,9 +849,12 @@ auto (neg/pos) & .7505 & .5440 & .8071 & .4518 & .6837 & 84.81 & 83.18 \\
 
 \section{最終的な設定まとめ}
 
+最終的に採用したXGBoostのハイパーパラメータと、その採用根拠を表~\ref{tab:final_params}にまとめる。
+
 \begin{table}[H]
 \centering
 \caption{最終的なXGBoostのハイパーパラメータ設定}
+\label{tab:final_params}
 \begin{tabular}{p{3cm}p{2.5cm}p{8.5cm}}
 \toprule
 パラメータ & 採用値 & 根拠(要約) \\
@@ -792,17 +875,24 @@ reg\_alpha (L1) & 0 (既定値) & reg\_lambdaと同様、0〜5の範囲でほぼ
 \end{table}
 
 \section{考察}
-第4回実験では、過去3走・5走の平均着順、複勝率、上りタイム、騎手複勝率、調教師複勝率などの過去情報を特徴量として追加した。その結果、第3回実験と比較して各モデルの性能が向上した。特にXGBoostではROC-AUCが0.6009から0.7449へ向上した。これは、競走馬の現在の状態だけでなく、過去の成績や得意条件などの傾向が複勝予測に有効であったためだと考えられる。
 
-第5回実験では、既存の特徴量を同一レース内で相対化した特徴量を追加した。その結果、XGBoostではROC-AUCが0.7449から0.7612へ向上した。競馬では、馬体重や過去成績などの絶対値だけではなく、同じレースに出走する馬との相対的な能力差も結果に影響すると考えられる。そのため、レース内での位置づけを表す特徴量が有効に働いたと考えられる。
+本研究では、ベースラインモデルの構築から特徴量の追加・改善、実運用を想定した回収率評価、ハイパーパラメータ調整に至るまで、一度の実験で終わらせず結果を分析しながら改善を繰り返すPDCAサイクルを実践した。分類指標の向上のみを目的とするのではなく、実データに内在する特徴量設計上の課題や、評価指標そのものの妥当性にまで踏み込んで検証できた点に、本テーマに取り組んだ意義があると考える。使用した特徴量は表~\ref{tab:basic_features}〜表~\ref{tab:relative_features}に示す通り基本情報・レース条件・過去成績・相対化特徴量の4系統に整理されており、これらを段階的に組み合わせることで、どの情報が複勝予測に寄与するのかを切り分けて確認できた。
 
-回収率評価では、予測確率の閾値を高く設定するほど回収率が向上する傾向が確認された。これは、予測確率が高い馬に限定することで、モデルが複勝と判断した馬の中でも、より確信度の高い馬を選択できたためだと考えられる。一方で、閾値を高くすると購入対象となる馬が減少するため、安定した収益を得るためには回収率だけでなく購入機会も考慮する必要がある。
+第1回実験では、馬齢・馬体重・距離・芝ダート区分といった最低限の特徴量のみでベースラインモデルを構築した(表~\ref{tab:exp1})。しかし、いずれのモデルもROC-AUCが0.56前後にとどまり、少数の基本情報だけでは複勝の可否を十分に説明できないことが明らかになった。
 
-モデルごとに性能の傾向に違いが見られた。XGBoostはROC-AUCが高く、予測確率の順位付け性能に優れていた。一方で、回収率評価ではRandom Forestが最も高い結果となった。このことから、分類性能が高いモデルが必ずしも収益性の高いモデルになるとは限らず、実際の購入戦略を考慮した評価が重要である。
+第2回実験では、他の馬券購入者の予想が集約された単勝オッズ・人気を特徴量に追加したところ、表~\ref{tab:exp2}に示す通りROC-AUCが最大0.81まで大きく向上した。しかし、この結果は本来検証したかった「馬自身の能力に基づく予測」とは異なり、人間の予想情報にモデルが強く依存してしまうという問題を含んでいた。また、オッズ・人気の説明力があまりに強いため、他の特徴量の寄与度やモデル間の性能差を適切に評価することも困難であった。これは、目的を精査せずに予測性能の高さのみを追い求めた結果生じたつまずきであり、以降は「馬自身の能力を表す特徴量のみで予測する」という当初の問題設定に立ち返り、オッズ・人気を除外する方針へ修正した。
 
-パラメータ調整に関しては、大きな性能向上は確認できなかったものの、各パラメータが分類指標と回収率に与える影響には共通した傾向が見られた。木の深さ(max\_depth)を増やすほどAUC・F1・Recallは単調に悪化する一方、回収率はdepth=6付近でほぼ頭打ちとなり、6から10まで増やしてもモデル1位回収率は+0.1pt未満、モデル上位3頭回収率も+0.2pt程度しか伸びなかった。回収率がほとんど変わらないにもかかわらず判別力とRecallだけが大きく犠牲になることから、深さを増やしすぎる設定は過学習方向に寄りすぎていると判断し、max\_depth=7を採用した。learning\_rateについても同様の構図が見られ、max\_depth=7で再スイープした結果、rate=0.1は0.07と比べてモデル1位回収率がわずかに(+0.15pt)上回るのみで、AUC・F1・Recall(特にRecallは+1.9pt)はいずれも0.07が明確に上回ったため、回収率をほぼ落とさず分類指標を保てるrate=0.07を採用した。scale\_pos\_weightについては、AUCへの感度は低い一方でF1・Recallはauto(既定)から離れるほど急激に悪化し(Recallは.684から.330へ半減以下)、回収率で見てもautoが大きく劣ることはなかったため、既定のautoを維持した。L1・L2正則化(reg\_lambda, reg\_alpha)は、いずれも0〜5の範囲でAUC・F1・回収率とも横ばいであり、正則化の効果はほぼ見られなかったため、既定値を維持した。これらの結果から、今回使用したデータではモデルのパラメータ調整よりも、入力する特徴量の設計が性能に大きな影響を与えたと考えられる。
+第3回実験では、オッズ・人気を除外し、斤量や馬体重増減、レース条件に関する特徴量を追加してモデルを再構築した。ところが表~\ref{tab:exp3}に示す通り、Random Forestを中心にRecallやF1が第2回実験から大きく低下し(Random ForestのRecallは0.5048から0.1885まで低下)、性能面では一時的に後退する結果となった。これは、単一レースの静的な情報だけでは馬の実力を十分に表現できていないことを示しており、失敗というよりも、次に取り組むべき課題、すなわち過去の傾向を表す特徴量の不足を明確にする契機となった。
 
-今回使用した特徴量は、過去成績や騎手・調教師の実績などを中心としており、展開予測や血統、馬場適性などの情報は考慮していない。そのため、これらの情報を追加することで、さらなる予測性能の向上が期待できる。また、今回は複勝を対象とした二値分類モデルを構築したが、購入金額の最適化や賭け方の戦略については検討していない。今後は、より多様な特徴量の追加や購入戦略の改善を行い、予測性能だけでなく実際の回収率向上を目指す必要がある。
+第4回実験では、過去3走・5走の平均着順、複勝率、上りタイム、騎手複勝率、調教師複勝率などの過去情報を特徴量として追加した。その結果、表~\ref{tab:exp4}に示す通り第3回実験と比較して各モデルの性能が向上し、特にXGBoostではROC-AUCが0.6009から0.7449へ向上した。これは、競走馬の現在の状態だけでなく、過去の成績や得意条件などの傾向が複勝予測に有効であったためだと考えられる。
+
+第5回実験では、既存の特徴量を同一レース内で相対化した特徴量(表~\ref{tab:relative_features})を追加した。その結果、表~\ref{tab:exp5}に示す通りXGBoostではROC-AUCが0.7449から0.7612へ向上した。競馬では、馬体重や過去成績などの絶対値だけではなく、同じレースに出走する馬との相対的な能力差も結果に影響すると考えられる。そのため、レース内での位置づけを表す特徴量が有効に働いたと考えられる。
+
+第6回実験では、予測確率に閾値を設定し、実際の馬券購入を想定した複勝回収率による評価を導入した。表~\ref{tab:exp6_xgb_top1}、表~\ref{tab:exp6_rf_top1}、表~\ref{tab:exp6_logistic_top1}に示す通り、閾値を高く設定するほど回収率が向上する傾向が確認された。これは、予測確率が高い馬に限定することで、モデルが複勝と判断した馬の中でも、より確信度の高い馬を選択できたためだと考えられる。一方で、閾値を高くすると購入対象となる馬(レース)が減少するため、安定した収益を得るためには回収率だけでなく購入機会も考慮する必要がある。また、この評価を通じてモデルごとの性能傾向の違いも明らかになった。XGBoostはROC-AUCが高く、予測確率の順位付け性能に優れていた一方、表~\ref{tab:exp6_rf_all}・表~\ref{tab:exp6_rf_top1}に示す通り回収率評価ではRandom Forestが最も高い結果となった。このことから、分類性能が高いモデルが必ずしも収益性の高いモデルになるとは限らず、実際の購入戦略を考慮した評価が重要であることが分かった。さらに、表~\ref{tab:exp6_xgb_odds_top1}〜表~\ref{tab:exp6_logistic_odds_top1}に示した参考実験(オッズ・人気を特徴量に含めたモデル)では、いずれの閾値でも本来のモデルを上回る回収率(1位方式で最大90\%超)が得られており、市場予想を排除して「馬自身の能力」のみで予測するという本研究の方針が、収益性の観点では一定の代償を伴っていることも確認された。
+
+第7回実験では、XGBoostを対象にハイパーパラメータ調整を行った。図~\ref{fig:sweep_max_depth}に示す通り、木の深さ(max\_depth)を増やすほどAUC・F1・Recallは単調に悪化する一方、回収率はdepth=6付近でほぼ頭打ちとなり、6から10まで増やしてもモデル1位回収率は+0.1pt未満、モデル上位3頭回収率も+0.2pt程度しか伸びなかった。回収率がほとんど変わらないにもかかわらず判別力とRecallだけが大きく犠牲になることから、深さを増やしすぎる設定は過学習方向に寄りすぎていると判断し、max\_depth=7を採用した。learning\_rateについても図~\ref{fig:sweep_lr_depth7}に示す通り同様の構図が見られ、max\_depth=7で再スイープした結果、rate=0.1は0.07と比べてモデル1位回収率がわずかに(+0.15pt)上回るのみで、AUC・F1・Recall(特にRecallは+1.9pt)はいずれも0.07が明確に上回ったため、回収率をほぼ落とさず分類指標を保てるrate=0.07を採用した。scale\_pos\_weightについては図~\ref{fig:sweep_spw}に示す通りAUCへの感度は低い一方でF1・Recallはauto(既定)から離れるほど急激に悪化し(Recallは.684から.330へ半減以下)、回収率で見てもautoが大きく劣ることはなかったため、既定のautoを維持した。L1・L2正則化(reg\_lambda, reg\_alpha)は、図~\ref{fig:sweep_reg_lambda}、図~\ref{fig:sweep_reg_alpha}に示す通りいずれも0〜5の範囲でAUC・F1・回収率とも横ばいであり、正則化の効果はほぼ見られなかった。当初は大幅な性能向上を期待してパラメータ調整に取り組んだが、実際には既定値からの改善幅はごくわずかにとどまった。この結果は、想定していたほどの成果が得られなかったという意味では一つのつまずきであるが、同時に「今回使用したデータではモデルのパラメータ調整よりも、入力する特徴量の設計が性能に大きな影響を与える」という重要な知見でもあり、第2回〜第5回における特徴量設計の妥当性を裏付ける結果となった。
+
+以上を通して、複勝予測においては単一レースの静的な情報よりも過去成績やレース内での相対的な位置づけを表す特徴量の設計が予測性能を大きく左右すること、また分類指標の高さと実際の回収率の高さは必ずしも一致しないことが分かった。今回使用した特徴量は、過去成績や騎手・調教師の実績などを中心としており、展開予測や血統、馬場適性などの情報は考慮していない。そのため、これらの情報を追加することで、さらなる予測性能の向上が期待できる。また、今回は複勝を対象とした二値分類モデルを構築したが、購入金額の最適化や賭け方の戦略については検討していない。今後は、より多様な特徴量の追加や購入戦略の改善を行い、予測性能だけでなく実際の回収率向上を目指す必要がある。
 
 \section{意図していた実行計画との違い}
 当初の実験計画では、モデルの良し悪しをAccuracy・F1・ROC-AUC・Precision・Recallといった機械学習上の分類指標のみで評価し、特徴量を追加するごとにこれらの指標が向上することを目的としていた(第1〜5回実験)。しかし、実験5終了時点で分類指標を確認した際、例えばROC-AUCが0.75から0.76に上がった、F1が0.49であるといった数値だけでは、そのモデルが複勝予測として実用上「良い」のかどうかを判断することが難しいという問題に直面した。分類指標はあくまでモデルの統計的な性能を示すものであり、実際に馬券を購入した場合にどの程度の収益が見込めるかという、本来知りたい実用的な価値とは直接結びついていなかったためである。
